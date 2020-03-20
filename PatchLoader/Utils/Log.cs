@@ -16,7 +16,6 @@ namespace PatchLoader.Utils {
         private static readonly object LogLock = new object();
         private static readonly string LogFilename = Path.Combine(Paths.WorkingPath, "PatchLoader.log");
         private static Stopwatch sw = Stopwatch.StartNew();
-        private readonly string _prefix;
 
         static Log() {
             try {
