@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{FD6438F0-AF7A-4196-8B28-F3B578489AA0}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PatchLoader</RootNamespace>
+    <AssemblyName>PatchLoader</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\System.Xml.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="EntryPoint.cs" />
+    <Compile Include="InternalLoader.cs" />
+    <Compile Include="Config.cs" />
+    <Compile Include="PatchProcessor.cs" />
+    <Compile Include="PatchScanner.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\ConfigManager.cs" />
+    <Compile Include="Utils\FakeCallerAttributes.cs" />
+    <Compile Include="Utils\Log.cs" />
+    <Compile Include="Utils\Paths.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Patch.API\Patch.API.csproj">
+      <Project>{c5c7f3dd-f203-4510-8525-7ee6fb0e6124}</Project>
+      <Name>Patch.API</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Mono.Cecil">
+      <Version>0.10.3</Version>
+    </PackageReference>
+  </ItemGroup>
+  <PropertyGroup>
+    <OutputDirectory>$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)\$(TargetName)\</OutputDirectory>
+  </PropertyGroup>
+  <Target Name="CreatePluginDirectory" AfterTargets="Build">
+    <MakeDir Directories="$(OutputDirectory)" Condition="!Exists('$(OutputDirectory')" />
+  </Target>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+      set "DEPLOYDIR=$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)\PatchLoader\"
+      xcopy /y "$(TargetDir)Mono.Cecil.dll" "%25DEPLOYDIR%25"
+      xcopy /y "$(TargetDir)Patch.API.dll" "%25DEPLOYDIR%25"
+      del "%25DEPLOYDIR%25PatchLoader.dll"
+      xcopy /y "$(TargetDir)PatchLoader.dll" "%25DEPLOYDIR%25"
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>
