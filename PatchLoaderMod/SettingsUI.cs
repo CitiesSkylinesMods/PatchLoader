@@ -4,15 +4,22 @@ using UnityEngine;
 
 namespace PatchLoaderMod {
     public class SettingsUi {
+        private readonly PatchLoaderMod _mod;
+        
         private UIButton _button;
         private UIHelper _helper;
         private UIScrollablePanel _panel;
         private UILabel _label;
 
+        public SettingsUi(PatchLoaderMod mod)
+        {
+            _mod = mod;
+        }
+
         public void CreateUi(UIHelperBase helper) {
             _helper = helper as UIHelper;
             var group = helper.AddGroup("Patch Loader");
-            _button = group.AddButton("<>", ButtonClicked) as UIButton;
+            _button = group.AddButton("<>", EnabledButtonClicked) as UIButton;
             _panel = _helper.self as UIScrollablePanel;
             _label = _panel.AddUIComponent<UILabel>();
             _label.relativePosition = new Vector3(10, 0, 10);
@@ -20,32 +27,28 @@ namespace PatchLoaderMod {
             UpdateStatus();
         }
 
-        private void ButtonClicked() {
-            if (Manager.Instance.Installed) {
-                if (Manager.Instance.Enabled) {
-                    Manager.Instance.Disable();
-                } else {
-                    Manager.Instance.Enable();
-                }
+        private void EnabledButtonClicked() {
+            if (_mod.CheckIfInstalled()) {
+                _mod.ToggleEnabled();
             } else {
-                Manager.Instance.Install();
+                _mod.Install();
             }
 
             UpdateStatus();
         }
 
         private void UpdateStatus() {
-            if (Manager.Instance.Installed) {
-                _button.text = Manager.Instance.Enabled ? "Disable" : "Enable";
-                _label.text = Manager.Instance.Enabled ? "Loader installed and enabled" : "Loader installed but disabled";
-                _label.textColor = Manager.Instance.Enabled ? Color.green : Color.yellow;
+            if (_mod.CheckIfInstalled()) {
+                _button.text = _mod.Enabled ? "Disable" : "Enable";
+                _label.text = _mod.Enabled ? "Loader installed and enabled" : "Loader installed but disabled";
+                _label.textColor = _mod.Enabled ? Color.green : Color.yellow;
             } else {
                 _label.text = "Loader not installed";
                 _label.textColor = Color.white;
                 _button.text = "Install";
             }
 
-            if (PatchLoaderMod.RestartRequired) {
+            if (_mod.RestartRequired) {
                 _label.text = "To apply changes game restart is required";
                 _label.textColor = Color.cyan;
                 _button.textColor = Color.gray;

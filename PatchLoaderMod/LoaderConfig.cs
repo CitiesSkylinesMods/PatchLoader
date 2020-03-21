@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using ColossalFramework;
+using ColossalFramework.Plugins;
 using PatchLoaderMod.Utils;
 
 namespace PatchLoaderMod {
@@ -13,28 +14,33 @@ namespace PatchLoaderMod {
         private const string TargetAssemblyKey = "targetAssembly";
         private readonly string _defaultTargetAssemblyPath;
 
-        public bool Enabled { get; set; }
-        public string LoaderPath { get; set; }
-        public bool Exists { get; private set; }
+        public bool Enabled { get; private set; }
+        public string LoaderPath { get; private set; }
 
-        private static LoaderConfig _instance;
-
-        public static LoaderConfig Instance =>
-            _instance ?? (_instance = new LoaderConfig());
-
-        private LoaderConfig() {
-            _defaultTargetAssemblyPath = $"{PatchLoaderMod.PluginInfo.modPath}\\PatchLoader\\PatchLoader.dll";
-            ReadConfig();
+        //Use static factory method 'Create()' for construction.
+        private LoaderConfig(string defaultTargetAssemblyPath)
+        {
+            _defaultTargetAssemblyPath = defaultTargetAssemblyPath;
         }
 
-        private string BuildConfig() {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder
-                .AppendLine(Header)
-                .Append(StateKey).Append("=").AppendLine(Enabled.ToString().ToLower())
-                .Append(TargetAssemblyKey).Append("=").Append(LoaderPath.IsNullOrWhiteSpace() ? _defaultTargetAssemblyPath : LoaderPath);
+        public static LoaderConfig Create()
+        {
+            var targetAssemblyPath = $"{PluginManager.instance.FindPluginInfo(Assembly.GetExecutingAssembly()).modPath}\\PatchLoader\\PatchLoader.dll";
+            var loaderConfig = new LoaderConfig(targetAssemblyPath);
+            loaderConfig.ReadConfig();
+            return loaderConfig;
+        }
 
-            return stringBuilder.ToString();
+        public void Enable()
+        {
+            Enabled = true;
+            SaveConfig();
+        }
+
+        public void Disable()
+        {
+            Enabled = false;
+            SaveConfig();
         }
 
         public void SaveConfig() {
@@ -53,11 +59,21 @@ namespace PatchLoaderMod {
             }
         }
 
+        private string BuildConfig()
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder
+                .AppendLine(Header)
+                .Append(StateKey).Append("=").AppendLine(Enabled.ToString().ToLower())
+                .Append(TargetAssemblyKey).Append("=").Append(LoaderPath.IsNullOrWhiteSpace() ? _defaultTargetAssemblyPath : LoaderPath);
+
+            return stringBuilder.ToString();
+        }
+
         private void ReadConfig() {
             Log.Info($"Reading Loader config");
             if (File.Exists(FileName)) {
                 Log.Info("Loader config found! Parsing...");
-                Exists = true;
                 string[] lines = File.ReadAllLines( FileName);
                 ParseConfig(lines);
                 UpdateLoaderPath();
