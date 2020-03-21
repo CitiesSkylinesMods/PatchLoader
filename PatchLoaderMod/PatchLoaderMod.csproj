@@ -54,10 +54,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LoaderConfig.cs" />
+    <Compile Include="DoorstopManager.cs" />
     <Compile Include="PatchLoaderMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SettingsUI.cs" />
+    <Compile Include="SettingsUi.cs" />
     <Compile Include="Utils\FakeCallerAttributes.cs" />
     <Compile Include="Utils\FileTools.cs" />
     <Compile Include="Utils\Log.cs" />
