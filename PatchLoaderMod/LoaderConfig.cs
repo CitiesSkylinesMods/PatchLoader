@@ -25,7 +25,12 @@ namespace PatchLoaderMod {
 
         public static LoaderConfig Create()
         {
-            var targetAssemblyPath = $"{PluginManager.instance.FindPluginInfo(Assembly.GetExecutingAssembly()).modPath}\\PatchLoader\\PatchLoader.dll";
+            var targetAssemblyPath = FileTools.PathCombine(
+                PluginManager.instance.FindPluginInfo(Assembly.GetExecutingAssembly()).modPath,
+                "PatchLoader",
+                "PatchLoader.dll"
+            );
+
             var loaderConfig = new LoaderConfig(targetAssemblyPath);
             loaderConfig.ReadConfig();
             return loaderConfig;
