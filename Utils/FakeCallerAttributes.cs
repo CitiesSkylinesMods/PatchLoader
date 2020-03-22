@@ -1,19 +1,21 @@
 
-
-// Set of attributes used by compiler to inject info about caller.
+// Set of attributes that are used by compiler to generate info about caller
 
 // ReSharper disable once CheckNamespace
-namespace System.Runtime.CompilerServices {
-    
+namespace System.Runtime.CompilerServices
+{
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
-    public class CallerMemberNameAttribute : Attribute {
+    public class CallerMemberNameAttribute : Attribute
+    {
     }
 
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
-    public class CallerFilePathAttribute : Attribute {
+    public class CallerFilePathAttribute : Attribute
+    {
     }
 
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
-    public class CallerLineNumberAttribute : Attribute {
+    public class CallerLineNumberAttribute : Attribute
+    {
     }
 }

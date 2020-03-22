@@ -58,12 +58,16 @@
     <Compile Include="PatchLoaderMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SettingsUi.cs" />
-    <Compile Include="Utils\FakeCallerAttributes.cs" />
-    <Compile Include="Utils\FileTools.cs" />
     <Compile Include="Utils\Log.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\winhttp.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Utils\Utils.csproj">
+      <Project>{6C49A64B-A8DA-4EB3-AB71-A9D77193685A}</Project>
+      <Name>Utils</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

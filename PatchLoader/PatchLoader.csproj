@@ -45,7 +45,6 @@
     <Compile Include="PatchScanner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\ConfigManager.cs" />
-    <Compile Include="Utils\FakeCallerAttributes.cs" />
     <Compile Include="Utils\Log.cs" />
     <Compile Include="Utils\Paths.cs" />
   </ItemGroup>
@@ -53,6 +52,11 @@
     <ProjectReference Include="..\Patch.API\Patch.API.csproj">
       <Project>{c5c7f3dd-f203-4510-8525-7ee6fb0e6124}</Project>
       <Name>Patch.API</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Utils\Utils.csproj">
+      <Project>{6C49A64B-A8DA-4EB3-AB71-A9D77193685A}</Project>
+      <Name>Utils</Name>
+      <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -4,6 +4,7 @@ using ICities;
 using PatchLoaderMod.Utils;
 using System.Reflection;
 using UnityEngine;
+using Utils;
 
 namespace PatchLoaderMod
 {
@@ -17,7 +18,7 @@ namespace PatchLoaderMod
         public void OnEnabled() {
             _pluginInfo = PluginManager.instance.FindPluginInfo(Assembly.GetExecutingAssembly());
 
-            var expectedTargetAssemblyPath = FileTools.PathCombine(
+            var expectedTargetAssemblyPath = PathExtensions.Combine(
                 _pluginInfo.modPath,
                 "PatchLoader",
                 "PatchLoader.dll"

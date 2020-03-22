@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using Utils;
 
 namespace PatchLoaderMod
 {
@@ -70,11 +71,8 @@ namespace PatchLoaderMod
             using (Stream input = executingAssembly.GetManifestResourceStream(resourcePath))
             using (Stream output = File.Create("winhttp.dll"))
             {
-                var success = FileTools.CopyStream(input, output);
-                if (!success)
-                {
-                    throw new Exception("FileTools.CopyStream() was not successful.");
-                }
+                Log._Debug("Copying stream.");
+                input.CopyStream(output);
             }
         }
 
