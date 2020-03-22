@@ -45,4 +45,9 @@
     <Compile Include="StreamExtensions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+      set "DEPLOYDIR=$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)\PatchLoader\"
+      xcopy /y "$(TargetDir)Utils.dll" "%25DEPLOYDIR%25"</PostBuildEvent>
+  </PropertyGroup>
 </Project>
