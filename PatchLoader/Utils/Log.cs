@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Utils;
 
 namespace PatchLoader.Utils {
    public class Log {
@@ -14,7 +15,7 @@ namespace PatchLoader.Utils {
         }
 
         private static readonly object LogLock = new object();
-        private static readonly string LogFilename = Path.Combine(Paths.WorkingPath, "PatchLoader.log");
+        private static readonly string LogFilename = PathExtensions.Combine(Paths.WorkingPath, "Cities_Data", "PatchLoader.log");
         private static Stopwatch sw = Stopwatch.StartNew();
 
         static Log() {
