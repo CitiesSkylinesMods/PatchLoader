@@ -38,7 +38,7 @@ namespace PatchLoader.Utils {
 
             ModsPath = PathExtensions.Combine(WorkingPath, "Files", "Mods");
 
-            AppDataModsPath = PathExtensions.Combine(Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)).FullName, "Colossal Order", "Cities_Skylines", "Addons", "Mods");
+            AppDataModsPath = PathExtensions.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Colossal Order", "Cities_Skylines", "Addons", "Mods");
         }
 
         public static void LogPaths() {
