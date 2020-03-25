@@ -58,7 +58,6 @@
     <Compile Include="PatchLoaderMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SettingsUi.cs" />
-    <Compile Include="Utils\Log.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\winhttp.dll" />

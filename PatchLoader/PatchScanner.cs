@@ -6,20 +6,27 @@ using System.Reflection;
 using System.Text;
 using Mono.Cecil;
 using Patch.API;
-using PatchLoader.Utils;
+using Utils;
 
 namespace PatchLoader {
-    public static class PatchScanner {
-        public static List<KeyValuePair<string, IPatch>> Scan(string path) {
+    public class PatchScanner {
+        private readonly Logger _logger;
+
+        public PatchScanner(Logger logger)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
+        public List<KeyValuePair<string, IPatch>> Scan(string path) {
             List<KeyValuePair<string, IPatch>> patches = new List<KeyValuePair<string, IPatch>>();
             string[] assemblies = new string[0];
             try {
                 assemblies = Directory.GetFiles(path, "*.dll", SearchOption.AllDirectories);
             } catch (Exception e) {
-                Log.Exception(e, "Error");
+                _logger.Exception(e, "Error");
             }
 
-            Log._Debug("Assemblies:\n" + string.Join("\n", assemblies));
+            _logger._Debug("Assemblies:\n" + string.Join("\n", assemblies));
             for (int i = 0; i < assemblies.Length; i++) {
                 if (ImplementsIPatch(assemblies[i])) {
                     Assembly ResolveEventHandler(object sender, ResolveEventArgs args) => ModDependenciesResolver(sender, args, Directory.GetParent(assemblies[i]).FullName);
@@ -33,20 +40,20 @@ namespace PatchLoader {
                             patches.Add(new KeyValuePair<string, IPatch>(assemblies[i], patch));
                         }
                     } catch (Exception e) {
-                        Log.Exception(e, "Could not instantiate class implementing IPatch interface");
+                        _logger.Exception(e, "Could not instantiate class implementing IPatch interface");
                     } finally {
                         AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve -= ResolveEventHandler;
                     }
                 }
             }
 
-            Log.Info($"Scan Results for path [{path}]\n {string.Join("\n", patches.Select(p => $"Type Name: {p.GetType().FullName} TargetAssembly: {p.Value.PatchTarget} Order: {p.Value.PatchOrderAsc}").ToArray())}");
+            _logger.Info($"Scan Results for path [{path}]\n {string.Join("\n", patches.Select(p => $"Type Name: {p.GetType().FullName} TargetAssembly: {p.Value.PatchTarget} Order: {p.Value.PatchOrderAsc}").ToArray())}");
             return patches;
         }
         
-        private static Assembly ModDependenciesResolver(object sender, ResolveEventArgs args, string path) {
+        private Assembly ModDependenciesResolver(object sender, ResolveEventArgs args, string path) {
             AssemblyName name = new AssemblyName(args.Name);
-            Log._Debug("Resolving local assembly " + args.Name);
+            _logger._Debug("Resolving local assembly " + args.Name);
             try {
                 return Assembly.LoadFile(Path.Combine(path, $"{name.Name}.dll"));
             } catch (Exception) {
@@ -54,7 +61,7 @@ namespace PatchLoader {
             }
         }
 
-        private static bool ImplementsIPatch(string file) {
+        private bool ImplementsIPatch(string file) {
             AssemblyDefinition assemblyDefinition = AssemblyDefinition.ReadAssembly(file);
             List<TypeDefinition> types = assemblyDefinition.Modules.SelectMany(m => m.Types).ToList();
             bool hit = false;
@@ -71,7 +78,7 @@ namespace PatchLoader {
 
             sb.AppendLine("====================================================");
 
-            Log.Info("Result Interface search:\n" + sb);
+            _logger.Info("Result Interface search:\n" + sb);
             return hit;
         }
     }

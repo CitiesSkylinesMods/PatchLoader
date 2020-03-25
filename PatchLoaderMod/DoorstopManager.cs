@@ -1,4 +1,3 @@
-using PatchLoaderMod.Utils;
 using System;
 using System.IO;
 using System.Reflection;
@@ -19,18 +18,20 @@ namespace PatchLoaderMod
             "targetAssembly"
         );
         private ConfigValues _configValues;
+        private Logger _logger;
 
         public bool RequiresRestart { get; private set; } = false;
 
         //Use static factory method 'Create()' for construction.
-        private DoorstopManager(string expectedTargetAssemblyPath)
+        private DoorstopManager(string expectedTargetAssemblyPath, Logger logger)
         {
             _expectedTargetAssemblyPath = expectedTargetAssemblyPath ?? throw new ArgumentNullException(nameof(expectedTargetAssemblyPath));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public static DoorstopManager Create(string expectedTargetAssemblyPath)
+        public static DoorstopManager Create(string expectedTargetAssemblyPath, Logger logger)
         {
-            var doorstopManager = new DoorstopManager(expectedTargetAssemblyPath);
+            var doorstopManager = new DoorstopManager(expectedTargetAssemblyPath, logger);
             if (doorstopManager.IsInstalled())
             {
                 doorstopManager.LoadConfig();
@@ -59,19 +60,19 @@ namespace PatchLoaderMod
 
             RequiresRestart = true;
 
-            Log.Info("Doorstop installed successfully.");
+            _logger.Info("Doorstop installed successfully.");
         }
 
         private void InstallWinHttpFile()
         {
             Assembly executingAssembly = Assembly.GetExecutingAssembly();
             string resourcePath = $"PatchLoaderMod.Resources.winhttp.dll";
-            Log._Debug("Resource path: " + resourcePath);
+            _logger._Debug("Resource path: " + resourcePath);
 
             using (Stream input = executingAssembly.GetManifestResourceStream(resourcePath))
             using (Stream output = File.Create("winhttp.dll"))
             {
-                Log._Debug("Copying stream.");
+                _logger._Debug("Copying stream.");
                 input.CopyStream(output);
             }
         }
@@ -103,9 +104,9 @@ namespace PatchLoaderMod
 
         private void SaveConfig()
         {
-            Log.Info($"Saving Loader config, actual loader state: [{_configValues.Enabled}]");
+            _logger.Info($"Saving Loader config, actual loader state: [{_configValues.Enabled}]");
             string content = BuildConfig(_configProperties, _configValues);
-            Log._Debug($"Saving config: \n{content}");
+            _logger._Debug($"Saving config: \n{content}");
             try
             {
                 using (FileStream stream = File.Create(_configFileName))
@@ -114,11 +115,11 @@ namespace PatchLoaderMod
                     stream.Write(byteContent, 0, byteContent.Length);
                 }
 
-                Log.Info("Loader config saved successfully!");
+                _logger.Info("Loader config saved successfully!");
             }
             catch (Exception e)
             {
-                Log.Error("Something went wrong while saving config \n" + e);
+                _logger.Error("Something went wrong while saving config \n" + e);
             }
         }
 
@@ -133,13 +134,13 @@ namespace PatchLoaderMod
 
         private void LoadConfig()
         {
-            Log.Info($"Loading Doorstop config");
+            _logger.Info($"Loading Doorstop config");
 
             try
             {
                 string[] lines = File.ReadAllLines(_configFileName);
 
-                Log.Info("Doorstop config found! Parsing...");
+                _logger.Info("Doorstop config found! Parsing...");
 
                 string[] stateKeyValue = lines[1].Split('=');
                 var enabled = bool.Parse(stateKeyValue[1]);
@@ -147,18 +148,18 @@ namespace PatchLoaderMod
                 string[] targetPathKeyValue = lines[2].Split('=');
                 var targetAssembly = targetPathKeyValue[1];
 
-                Log.Info($"Loader config parsing complete. Status: [{(enabled ? "enabled" : "disabled")}] Loader assembly path [{targetAssembly}])");
+                _logger.Info($"Loader config parsing complete. Status: [{(enabled ? "enabled" : "disabled")}] Loader assembly path [{targetAssembly}])");
 
                 _configValues = new ConfigValues(enabled, targetAssembly);
             }
             catch (FileNotFoundException)
             {
-                Log.Info("Doorstop config not found!");
+                _logger.Info("Doorstop config not found!");
                 throw;
             }
             catch (Exception)
             {
-                Log.Error("Invalid Config!");
+                _logger.Error("Invalid Config!");
                 throw;
             }
         }
@@ -168,7 +169,7 @@ namespace PatchLoaderMod
             if (_configValues.TargetAssembly == _expectedTargetAssemblyPath)
                 return;
 
-            Log.Info("Updating Loader config with new path location");
+            _logger.Info("Updating Loader config with new path location");
 
             _configValues.TargetAssembly = _expectedTargetAssemblyPath;
             SaveConfig();
