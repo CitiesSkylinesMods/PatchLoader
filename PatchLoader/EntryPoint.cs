@@ -1,30 +1,50 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
-using PatchLoader.Utils;
+using Utils;
 
-namespace PatchLoader {
+namespace PatchLoader
+{
     public class EntryPoint {
+        private static Paths _paths;
+        private static Logger _logger;
 
         /// <summary>
         ///  Entry point called from Doorstop
         /// </summary>
         /// <param name="args">First argument is the path of the currently executing process.</param>
         public static void Main(string[] args) {
-            Paths.LoadVars();
-            Paths.LogPaths();
+            _paths = Paths.Create();
+            _logger = new Logger(PathExtensions.Combine(_paths.WorkingPath, "Cities_Data", "PatchLoader.log"));
+            _paths.WorkshopModsPath = GetWorkshopModsPath(_paths.WorkingPath, _logger);
+            
+            _logger._Debug(_paths.ToString());
+
             try {
                 AppDomain.CurrentDomain.TypeResolve += AssemblyResolver;
                 AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolver;
 
-                typeof(EntryPoint).Assembly.GetType($"PatchLoader.{nameof(InternalLoader)}")
-                    ?.GetMethod(nameof(InternalLoader.Main))
-                    ?.Invoke(null, new object[] {args});
+                new InternalLoader(_logger, _paths)
+                    .Run();
             } catch (Exception e) {
-                Log.Exception(e);
+                _logger.Exception(e);
             } finally {
                 AppDomain.CurrentDomain.AssemblyResolve -= AssemblyResolver;
                 AppDomain.CurrentDomain.TypeResolve -= AssemblyResolver;
+            }
+        }
+
+        private static string GetWorkshopModsPath(string workingPath, Logger logger)
+        {
+            var configFilePath = Path.Combine(workingPath, "PatchLoader.Config.xml");
+            if (File.Exists(configFilePath))
+            {
+                return new ConfigManager<Config>(configFilePath, logger).Load().WorkshopPath;
+            }
+            else
+            {
+                logger.Info($"File '{configFilePath}' does not exist.");
+                return null;
             }
         }
 
@@ -36,9 +56,9 @@ namespace PatchLoader {
         /// <returns></returns>
         private static Assembly AssemblyResolver(object sender, ResolveEventArgs args) {
             AssemblyName name = new AssemblyName(args.Name);
-            Log._Debug("Resolving global assembly " + args.Name);
+            _logger._Debug("Resolving global assembly " + args.Name);
             try {
-                return Assembly.LoadFile(Path.Combine(Paths.WorkingPath, $"{name.Name}.dll"));
+                return Assembly.LoadFile(Path.Combine(_paths.WorkingPath, $"{name.Name}.dll"));
             } catch (Exception) {
                 return null;
             }

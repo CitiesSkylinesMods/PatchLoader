@@ -33,35 +33,40 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\Dependencies\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="ColossalManaged, Version=0.3.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\Dependencies\ColossalManaged.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ColossalManaged.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="ICities, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\Dependencies\ICities.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ICities.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\Dependencies\UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LoaderConfig.cs" />
-    <Compile Include="LoadingExtension.cs" />
-    <Compile Include="Manager.cs" />
+    <Compile Include="DoorstopManager.cs" />
     <Compile Include="PatchLoaderMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SettingsUI.cs" />
-    <Compile Include="Utils\FakeCallerAttributes.cs" />
-    <Compile Include="Utils\FileTools.cs" />
-    <Compile Include="Utils\Log.cs" />
+    <Compile Include="SettingsUi.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\winhttp.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Utils\Utils.csproj">
+      <Project>{6C49A64B-A8DA-4EB3-AB71-A9D77193685A}</Project>
+      <Name>Utils</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -4,36 +4,47 @@ using System.IO;
 using System.Reflection;
 using Mono.Cecil;
 using Patch.API;
-using PatchLoader.Utils;
+using Utils;
 
-namespace PatchLoader {
-    public static class PatchProcessor {
-        private static readonly Dictionary<string, AssemblyDefinition> Assemblies = new Dictionary<string, AssemblyDefinition>();
+namespace PatchLoader
+{
+    public class PatchProcessor
+    {
+        private readonly Dictionary<string, AssemblyDefinition> _assemblies = new Dictionary<string, AssemblyDefinition>();
+        private readonly Logger _logger;
 
-        public static void ProcessPatches(IEnumerable<KeyValuePair<string, IPatch>> patches) {
-            foreach (KeyValuePair<string,IPatch> keyValuePair in patches) {
+        public PatchProcessor(Logger logger)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
+        public void ProcessPatches(IEnumerable<KeyValuePair<string, IPatch>> patches, Paths paths)
+        {
+            foreach (KeyValuePair<string, IPatch> keyValuePair in patches)
+            {
                 IPatch patch = keyValuePair.Value;
                 string assemblyName = patch.PatchTarget.Name;
 
-                if (!Assemblies.TryGetValue(assemblyName, out AssemblyDefinition definition))
+                if (!_assemblies.TryGetValue(assemblyName, out AssemblyDefinition definition))
                 {
-                    definition = AssemblyDefinition.ReadAssembly(Path.Combine(Paths.ManagedFolderPath, assemblyName + ".dll"));
-                    Assemblies.Add(assemblyName, definition);
+                    definition = AssemblyDefinition.ReadAssembly(Path.Combine(paths.ManagedFolderPath, assemblyName + ".dll"));
+                    _assemblies.Add(assemblyName, definition);
                 }
 
                 try
                 {
-                    Log.Info($"Executing patch {assemblyName} of {keyValuePair.Key}");
-                    Assemblies[assemblyName] = patch.Execute(definition, new PatcherLog(), Path.GetDirectoryName(keyValuePair.Key));
+                    _logger.Info($"Executing patch {assemblyName} of {keyValuePair.Key}");
+                    _assemblies[assemblyName] = patch.Execute(definition, new WithPrefixLogger(_logger, assemblyName), Path.GetDirectoryName(keyValuePair.Key));
                 }
                 catch (Exception e)
                 {
-                    Log.Exception(e, "Patch caused an exception");
+                    _logger.Exception(e, "Patch caused an exception");
                 }
             }
 
-            foreach (KeyValuePair<string, AssemblyDefinition> keyValuePair in Assemblies) {
-                Log.Info($"Loading assembly: {keyValuePair.Key}");
+            foreach (KeyValuePair<string, AssemblyDefinition> keyValuePair in _assemblies)
+            {
+                _logger.Info($"Loading assembly: {keyValuePair.Key}");
                 LoadAssemblyAndDispose(keyValuePair.Value);
             }
         }
@@ -42,8 +53,10 @@ namespace PatchLoader {
         /// Loads modified assembly to CLR
         /// </summary>
         /// <param name="assemblyDefinition"></param>
-        public static void LoadAssemblyAndDispose(AssemblyDefinition assemblyDefinition) {
-            using (MemoryStream ms = new MemoryStream()) {
+        public void LoadAssemblyAndDispose(AssemblyDefinition assemblyDefinition)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
                 assemblyDefinition.Write(ms);
                 Assembly.Load(ms.ToArray());
             }
@@ -52,15 +65,26 @@ namespace PatchLoader {
         }
     }
 
-    public class PatcherLog : ILogger {
-        public void Info(string message) {
-            Log.Info($"[{Prefix}] {message}");
+    public class WithPrefixLogger : ILogger
+    {
+        private readonly Logger _logger;
+
+        public WithPrefixLogger(Logger logger, string prefix)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            Prefix = prefix ?? throw new ArgumentNullException(nameof(prefix));
         }
 
-        public void Error(string message) {
-            Log.Error($"[{Prefix}] {message}");
+        public string Prefix { get; }
+
+        public void Info(string message)
+        {
+            _logger.Info($"[{Prefix}] {message}");
         }
 
-        public string Prefix { get; set; }
+        public void Error(string message)
+        {
+            _logger.Error($"[{Prefix}] {message}");
+        }
     }
 }

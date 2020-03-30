@@ -1,39 +1,44 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Patch.API;
-using PatchLoader.Utils;
+using Utils;
 
 namespace PatchLoader {
     // ReSharper disable once ClassNeverInstantiated.Global
     internal class InternalLoader {
-        public static void Main(string[] args) {
+        private readonly Paths _paths;
+        private readonly Logger _logger;
+
+        public InternalLoader(Logger logger, Paths paths)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _paths = paths ?? throw new ArgumentNullException(nameof(paths));
+        }
+
+        public void Run()
+        {
             AppDomain.CurrentDomain.TypeResolve += LocalPatcherAssemblyResolver;
             AppDomain.CurrentDomain.AssemblyResolve += LocalPatcherAssemblyResolver;
 
-            List<KeyValuePair<string, IPatch>> patches = new List<KeyValuePair<string, IPatch>>();
-            CollectPatches(patches);
-            patches.Sort(SortByPriority);
-            PatchProcessor.ProcessPatches(patches);
-            
+            var patches = CollectPatches(_paths);
+            var patchProcessor = new PatchProcessor(_logger);
+            patchProcessor.ProcessPatches(patches, _paths);
+
             AppDomain.CurrentDomain.AssemblyResolve -= LocalPatcherAssemblyResolver;
             AppDomain.CurrentDomain.TypeResolve -= LocalPatcherAssemblyResolver;
         }
 
-        private static int SortByPriority(KeyValuePair<string, IPatch> x, KeyValuePair<string, IPatch> y) {
-            return x.Value.PatchOrderAsc - y.Value.PatchOrderAsc;
-        }
+        private List<KeyValuePair<string, IPatch>> CollectPatches(Paths paths) {
+            var patchScanner = new PatchScanner(_logger);
 
-        private static void CollectPatches(List<KeyValuePair<string, IPatch>> patches) {
-            patches.AddRange(PatchScanner.Scan(Paths.ModsPath));
-            patches.AddRange(PatchScanner.Scan(Paths.AppDataModsPath));
-            Config config = Config.Instance;
-            if (Directory.Exists(config.WorkshopPath)) {
-                patches.AddRange(PatchScanner.Scan(config.WorkshopPath));
-            } else {
-                Log.Error("Workshop directory not found. Skipping!");
-            }
+            return paths
+                .AllModsFolders()
+                .SelectMany(folder => patchScanner.Scan(folder))
+                .OrderBy(x => x.Value.PatchOrderAsc)
+                .ToList();
         }
 
         /// <summary>
@@ -42,11 +47,11 @@ namespace PatchLoader {
         /// <param name="sender"></param>
         /// <param name="args"></param>
         /// <returns></returns>
-        private static Assembly LocalPatcherAssemblyResolver(object sender, ResolveEventArgs args) {
+        private Assembly LocalPatcherAssemblyResolver(object sender, ResolveEventArgs args) {
             AssemblyName name = new AssemblyName(args.Name);
-            Log._Debug("Resolving local assembly " + args.Name);
+            _logger._Debug("Resolving local assembly " + args.Name);
             try {
-                return Assembly.LoadFile(Path.Combine(Paths.WorkingPath, $"{name.Name}.dll"));
+                return Assembly.LoadFile(Path.Combine(_paths.WorkingPath, $"{name.Name}.dll"));
             } catch (Exception) {
                 return null;
             }

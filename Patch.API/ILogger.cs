@@ -21,6 +21,6 @@
         /// Log entry prefix. Concatenated to <see cref="Info"/> and <see cref="Error"/>
         /// Should be set up in <see cref="IPatch.Execute"/>
         /// </summary>
-        string Prefix { get; set; }
+        string Prefix { get; }
     }
 }
