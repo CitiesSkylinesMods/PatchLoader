@@ -1,6 +1,7 @@
 ﻿using ColossalFramework.IO;
 using ColossalFramework.PlatformServices;
 using ColossalFramework.Plugins;
+using ColossalFramework.UI;
 using ICities;
 using System.IO;
 using System.Reflection;
@@ -46,7 +47,7 @@ namespace PatchLoaderMod
 
             if (_doorstopManager.RequiresRestart)
             {
-                ShowRestartGameModal();
+                ShowRestartGameModal($"The '{Name}' was installed and the game must be restarted in order to initialize new patches.");
             }
 
             Debug.Log("PatchLoader enabled");
@@ -85,7 +86,7 @@ namespace PatchLoaderMod
 
             if (_doorstopManager.RequiresRestart)
             {
-                ShowRestartGameModal();
+                ShowRestartGameModal($"The '{Name}' was uninstalled and the game must be restarted in order to restore it's original state.");
             }
 
             _doorstopManager = null;
@@ -104,10 +105,18 @@ namespace PatchLoaderMod
                 .CreateUi(helper);
         }
 
-        //TODO: change to nice dialog
-        private void ShowRestartGameModal()
+        private void ShowRestartGameModal(string message)
         {
-            Application.Quit(); 
+            CoroutineHelper.WaitFor(
+                () => UIView.library != null,
+                1f,
+                () => {
+                    UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel", (comp, result) =>
+                    {
+                        LoadingManager.instance.QuitApplication();
+                    }).SetMessage("PatchLoaderMod", message, false);
+                }
+            );
         }
     }
 }
