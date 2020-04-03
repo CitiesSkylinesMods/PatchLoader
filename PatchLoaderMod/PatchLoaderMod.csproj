@@ -54,6 +54,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CoroutineHelper.cs" />
     <Compile Include="DoorstopManager.cs" />
     <Compile Include="PatchLoaderMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
