@@ -37,7 +37,6 @@ namespace PatchLoaderMod
             {
                 _doorstopManager.Install();
                 SaveOrUpdateWorkshopPath();
-
             }
 
             if (!_doorstopManager.IsEnabled())
@@ -61,19 +60,19 @@ namespace PatchLoaderMod
                 return; //not a mod from the workshop folder, so we can give up here.
             }
 
+            var workshopPath = Directory.GetParent(PlatformService.workshop.GetSubscribedItemPath(_pluginInfo.publishedFileID)).FullName;
             if (File.Exists(_patchLoderConfigFilePath))
             {
                 var config = _configManager.Load();
-
-                if (config.WorkshopPath != PlatformService.workshop.GetSubscribedItemPath(_pluginInfo.publishedFileID))
+                if (config.WorkshopPath != workshopPath)
                 {
-                    config.WorkshopPath = DataLocation.addonsPath;
+                    config.WorkshopPath = workshopPath;
                     _configManager.Save(config);
                 }
             }
             else
             {
-                var config = new Config() { WorkshopPath = DataLocation.addonsPath };
+                var config = new Config() { WorkshopPath = workshopPath };
                 _configManager.Save(config);
             }
         }
