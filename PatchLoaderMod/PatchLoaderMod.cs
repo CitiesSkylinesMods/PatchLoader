@@ -3,6 +3,7 @@ using ColossalFramework.PlatformServices;
 using ColossalFramework.Plugins;
 using ColossalFramework.UI;
 using ICities;
+using System;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
@@ -10,7 +11,8 @@ using Utils;
 
 namespace PatchLoaderMod
 {
-    public class PatchLoaderMod : LoadingExtensionBase, IUserMod {
+    public class PatchLoaderMod : LoadingExtensionBase, IUserMod
+    {
         private DoorstopManager _doorstopManager;
         private PluginManager.PluginInfo _pluginInfo;
         private Utils.Logger _logger;
@@ -20,7 +22,8 @@ namespace PatchLoaderMod
         public string Name => "Patch Loader Mod";
         public string Description => "Automatically loads Patches implementing IPatch API.";
 
-        public void OnEnabled() {
+        public void OnEnabled()
+        {
             _pluginInfo = PluginManager.instance.FindPluginInfo(Assembly.GetExecutingAssembly());
             _logger = new Utils.Logger(Path.Combine(Application.dataPath, "PatchLoaderMod.log"));
             _patchLoderConfigFilePath = Path.Combine(DataLocation.applicationBase, "PatchLoader.Config.xml");
@@ -32,7 +35,7 @@ namespace PatchLoaderMod
                 "PatchLoader.dll"
             );
             _doorstopManager = DoorstopManager.Create(expectedTargetAssemblyPath, _logger);
-            
+
             if (!_doorstopManager.IsInstalled())
             {
                 _doorstopManager.Install();
@@ -77,7 +80,8 @@ namespace PatchLoaderMod
             }
         }
 
-        public void OnDisabled() {
+        public void OnDisabled()
+        {
             if (_doorstopManager.IsInstalled() && !_pluginInfo.isEnabled)
             {
                 _doorstopManager.Disable();
@@ -108,13 +112,18 @@ namespace PatchLoaderMod
         {
             CoroutineHelper.WaitFor(
                 () => UIView.library != null,
-                1f,
-                () => {
+                success: () =>
+                {
                     UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel", (comp, result) =>
                     {
                         LoadingManager.instance.QuitApplication();
                     }).SetMessage("PatchLoaderMod", message, false);
-                }
+                },
+                failure: () =>
+                {
+                    throw new Exception("PatchLoader could not open an important dialog. Something seems to be seriously broken. Please contact the author.");
+                },
+                stopPollingAfterInSec: 30f
             );
         }
     }
