@@ -14,6 +14,12 @@ namespace Utils
         public Logger(string logFilePath)
         {
             _logFilePath = logFilePath ?? throw new ArgumentNullException(nameof(logFilePath));
+            try {
+                if (File.Exists(_logFilePath)) {
+                    File.Delete(_logFilePath);
+                }
+            } catch (Exception) {
+            }
         }
 
         [Conditional("DEBUG")]
