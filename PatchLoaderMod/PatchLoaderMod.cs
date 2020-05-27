@@ -16,7 +16,7 @@ namespace PatchLoaderMod
         private DoorstopManager _doorstopManager;
         private PluginManager.PluginInfo _pluginInfo;
         private Utils.Logger _logger;
-        private string _patchLoderConfigFilePath;
+        private string _patchLoaderConfigFilePath;
         private ConfigManager<Config> _configManager;
 
         public string Name => "Patch Loader Mod";
@@ -25,9 +25,10 @@ namespace PatchLoaderMod
         public void OnEnabled()
         {
             _pluginInfo = PluginManager.instance.FindPluginInfo(Assembly.GetExecutingAssembly());
-            _logger = new Utils.Logger(Path.Combine(Application.dataPath, "PatchLoaderMod.log"));
-            _patchLoderConfigFilePath = Path.Combine(DataLocation.applicationBase, "PatchLoader.Config.xml");
-            _configManager = new ConfigManager<Config>(_patchLoderConfigFilePath, _logger);
+            EnsureLogsDirectoryCreated();
+            _logger = new Utils.Logger(Path.Combine(Path.Combine(Application.dataPath, "Logs"), "PatchLoaderMod.log"));
+            _patchLoaderConfigFilePath = Path.Combine(DataLocation.applicationBase, "PatchLoader.Config.xml");
+            _configManager = new ConfigManager<Config>(_patchLoaderConfigFilePath, _logger);
 
             var expectedTargetAssemblyPath = PathExtensions.Combine(
                 _pluginInfo.modPath,
@@ -64,7 +65,7 @@ namespace PatchLoaderMod
             }
 
             var workshopPath = Directory.GetParent(PlatformService.workshop.GetSubscribedItemPath(_pluginInfo.publishedFileID)).FullName;
-            if (File.Exists(_patchLoderConfigFilePath))
+            if (File.Exists(_patchLoaderConfigFilePath))
             {
                 var config = _configManager.Load();
                 if (config.WorkshopPath != workshopPath)
@@ -95,7 +96,7 @@ namespace PatchLoaderMod
             _doorstopManager = null;
             _pluginInfo = null;
             _logger = null;
-            _patchLoderConfigFilePath = null;
+            _patchLoaderConfigFilePath = null;
             _configManager = null;
 
             Debug.Log("PatchLoader disabled");
@@ -125,6 +126,12 @@ namespace PatchLoaderMod
                 },
                 stopPollingAfterInSec: 30f
             );
+        }
+
+        private void EnsureLogsDirectoryCreated() {
+            if (!Directory.Exists(Path.Combine(Application.dataPath, "Logs"))) {
+                Directory.CreateDirectory(Path.Combine(Application.dataPath, "Logs"));
+            }
         }
     }
 }
