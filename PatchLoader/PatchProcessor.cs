@@ -12,10 +12,12 @@ namespace PatchLoader
     {
         private readonly Dictionary<string, AssemblyDefinition> _assemblies = new Dictionary<string, AssemblyDefinition>();
         private readonly Logger _logger;
+        private readonly CustomAssemblyResolver _resolver;
 
         public PatchProcessor(Logger logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _resolver = new CustomAssemblyResolver(_logger);
         }
 
         public void ProcessPatches(IEnumerable<KeyValuePair<string, IPatch>> patches, Paths paths)
@@ -27,8 +29,9 @@ namespace PatchLoader
 
                 if (!_assemblies.TryGetValue(assemblyName, out AssemblyDefinition definition))
                 {
-                    definition = AssemblyDefinition.ReadAssembly(Path.Combine(paths.ManagedFolderPath, assemblyName + ".dll"));
+                    definition = AssemblyDefinition.ReadAssembly(Path.Combine(paths.ManagedFolderPath, assemblyName + ".dll"), new ReaderParameters{AssemblyResolver = _resolver} );
                     _assemblies.Add(assemblyName, definition);
+                    _resolver.RegisterAssembly(definition);
                 }
 
                 try
@@ -48,7 +51,7 @@ namespace PatchLoader
                 LoadAssemblyAndDispose(keyValuePair.Value);
             }
         }
-
+        
         /// <summary>
         /// Loads modified assembly to CLR
         /// </summary>

@@ -38,6 +38,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomAssemblyResolver.cs" />
     <Compile Include="EntryPoint.cs" />
     <Compile Include="InternalLoader.cs" />
     <Compile Include="PatchProcessor.cs" />
