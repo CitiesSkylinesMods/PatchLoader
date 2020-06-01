@@ -21,6 +21,7 @@ namespace PatchLoader
             ManagedFolderPath = managedFolderPath ?? throw new ArgumentNullException(nameof(managedFolderPath));
             FilesModsPath = filesModsPath ?? throw new ArgumentNullException(nameof(filesModsPath));
             AppDataModsPath = appDataModsPath ?? throw new ArgumentNullException(nameof(appDataModsPath));
+            SetupLogsDirectoryPath();
         }
 
         public static Paths Create()
@@ -68,6 +69,11 @@ namespace PatchLoader
         /// Path to Workshop mods folder.
         /// </summary>
         public string WorkshopModsPath { get; set; } //can be null
+        
+        /// <summary>
+        /// Path to Logs folder
+        /// </summary>
+        public string LogsPath { get; set; }
 
         public IEnumerable<string> AllModsFolders()
         {
@@ -77,6 +83,15 @@ namespace PatchLoader
             {
                 yield return WorkshopModsPath;
             }
+        }
+
+        private void SetupLogsDirectoryPath() {
+            string managedParent = new DirectoryInfo(ManagedFolderPath).Parent.FullName;
+            if (!Directory.Exists(Path.Combine(managedParent, "Logs"))) {
+                Directory.CreateDirectory(Path.Combine(managedParent, "Logs"));
+            }
+
+            LogsPath = Path.Combine(managedParent, "Logs");
         }
 
         public override string ToString()

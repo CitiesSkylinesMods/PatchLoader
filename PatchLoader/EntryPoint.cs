@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using Utils;
+using Logger = Utils.Logger;
 
 namespace PatchLoader
 {
@@ -15,7 +16,7 @@ namespace PatchLoader
         /// <param name="args">First argument is the path of the currently executing process.</param>
         public static void Main(string[] args) {
             _paths = Paths.Create();
-            _logger = new Logger(PathExtensions.Combine(_paths.WorkingPath, "Cities_Data", "PatchLoader.log"));
+            _logger = new Logger(PathExtensions.Combine(_paths.LogsPath, "PatchLoader.log"));
             _paths.WorkshopModsPath = GetWorkshopModsPath(_paths.WorkingPath, _logger);
             
             _logger._Debug(_paths.ToString());
