@@ -55,7 +55,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CoroutineHelper.cs" />
-    <Compile Include="DoorstopManager.cs" />
+    <Compile Include="Doorstop\ConfigValues.cs" />
+    <Compile Include="Doorstop\DoorstopManager.cs" />
+    <Compile Include="Doorstop\LinuxDoorstopManager.cs" />
+    <Compile Include="Doorstop\MacOSDoorstopManager.cs" />
+    <Compile Include="Doorstop\UnixConfigProperties.cs" />
+    <Compile Include="Doorstop\WindowsConfigProperties.cs" />
+    <Compile Include="Doorstop\WindowsDoorstopManager.cs" />
     <Compile Include="PatchLoaderMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SettingsUi.cs" />
@@ -68,6 +74,10 @@
       <Project>{6C49A64B-A8DA-4EB3-AB71-A9D77193685A}</Project>
       <Name>Utils</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\linux_doorstop.so" />
+    <EmbeddedResource Include="Resources\macos_doorstop.dylib" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

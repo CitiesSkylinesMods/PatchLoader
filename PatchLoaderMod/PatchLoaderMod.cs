@@ -6,6 +6,7 @@ using ICities;
 using System;
 using System.IO;
 using System.Reflection;
+using PatchLoaderMod.Doorstop;
 using UnityEngine;
 using Utils;
 
@@ -37,20 +38,31 @@ namespace PatchLoaderMod
             );
             _doorstopManager = DoorstopManager.Create(expectedTargetAssemblyPath, _logger);
 
+            if (Application.platform == RuntimePlatform.OSXPlayer) {
+                ShowExceptionModal($"The '{Name}'\nMacOS platform is not supported yet.\n\n" +
+                                   "Mod will disable itself.\n" +
+                                   "Follow FPS Booster and PatchLoader mod development to stay informed about changes.\n" +
+                                   "MacOS support will be added in one of the next major updates for PatchLoader mod.",
+                    () => {
+                        _pluginInfo.isEnabled = false;
+                    });
+                return;
+            }
+
             if (!_doorstopManager.IsInstalled())
             {
                 _doorstopManager.Install();
                 SaveOrUpdateWorkshopPath();
             }
 
-            if (!_doorstopManager.IsEnabled())
+            if (_doorstopManager.CanEnable && !_doorstopManager.IsEnabled())
             {
                 _doorstopManager.Enable();
             }
 
             if (_doorstopManager.RequiresRestart)
             {
-                ShowRestartGameModal($"The '{Name}' was installed and the game must be restarted in order to initialize new patches.");
+                ShowRestartGameModal($"The '{Name}' was installed.\n{_doorstopManager.InstallMessage}");
             }
 
             Debug.Log("PatchLoader enabled");
@@ -61,6 +73,7 @@ namespace PatchLoaderMod
         {
             if (_pluginInfo.publishedFileID == PublishedFileId.invalid)
             {
+                _logger.Info("Mod not in workshop folder. Cannot detect workshop directory path. Config not saved.");
                 return; //not a mod from the workshop folder, so we can give up here.
             }
 
@@ -83,6 +96,11 @@ namespace PatchLoaderMod
 
         public void OnDisabled()
         {
+            if (Application.platform == RuntimePlatform.OSXPlayer) {
+                Debug.Log("PatchLoader disabled");
+                return;
+            }
+
             if (_doorstopManager.IsInstalled() && !_pluginInfo.isEnabled)
             {
                 _doorstopManager.Disable();
@@ -90,7 +108,7 @@ namespace PatchLoaderMod
 
             if (_doorstopManager.RequiresRestart)
             {
-                ShowRestartGameModal($"The '{Name}' was uninstalled and the game must be restarted in order to restore it's original state.");
+                ShowRestartGameModal($"The '{Name}' was uninstalled.\n{_doorstopManager.UninstallMessage}");
             }
 
             _doorstopManager = null;
@@ -108,7 +126,25 @@ namespace PatchLoaderMod
             new SettingsUi()
                 .CreateUi(helper);
         }
-
+        private void ShowExceptionModal(string message, Action callback)
+        {
+            CoroutineHelper.WaitFor(
+                () => UIView.library != null,
+                success: () =>
+                {
+                    UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel", (comp, result) =>
+                    {
+                        callback.Invoke();
+                    }).SetMessage("PatchLoaderMod", message, false);
+                },
+                failure: () =>
+                {
+                    throw new Exception("PatchLoader could not open an important dialog. Something seems to be seriously broken. Please contact the author.");
+                },
+                stopPollingAfterInSec: 30f
+            );
+        }
+        
         private void ShowRestartGameModal(string message)
         {
             CoroutineHelper.WaitFor(

@@ -17,10 +17,12 @@ namespace Utils
             _filePath = filePath ?? throw new ArgumentNullException(nameof(filePath));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _xmlSerializerNamespaces.Add(string.Empty, string.Empty);
+            _logger.Info($"Creating ConfigManager located in [{_filePath}]");
         }
 
         public TC Load()
         {
+            _logger.Info($"Loading config from [{_filePath}]");
             using (var sr = new StreamReader(_filePath))
             {
                 return _xmlSerializer.Deserialize(sr) as TC;
@@ -29,6 +31,7 @@ namespace Utils
 
         public void Save(TC data)
         {
+            _logger.Info($"Saving config to [{_filePath}]");
             using (var sw = new StreamWriter(_filePath))
             {
                 _xmlSerializer.Serialize(sw, data, _xmlSerializerNamespaces);
