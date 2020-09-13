@@ -47,7 +47,7 @@ namespace PatchLoader {
                 }
             }
 
-            _logger.Info($"Scan Results for path [{path}]\n {string.Join("\n", patches.Select(p => $"Type Name: {p.GetType().FullName} TargetAssembly: {p.Value.PatchTarget} Order: {p.Value.PatchOrderAsc}").ToArray())}");
+            _logger.Info($"Scan Results for path [{path}]\n{string.Join("\n", patches.Select(p => $"IPatch Assembly Path: {p.Key} TargetAssembly {p.Value.PatchTarget} Order: {p.Value.PatchOrderAsc}").ToArray())}");
             return patches;
         }
         
@@ -68,9 +68,8 @@ namespace PatchLoader {
             StringBuilder sb = new StringBuilder();
             foreach (TypeDefinition typeDefinition in types) {
                 if (typeDefinition.IsClass && !typeDefinition.IsAbstract) {
-                    // sb.AppendLine(typeDefinition.FullName);
                     if (typeDefinition.Interfaces.Any(type => type.InterfaceType.FullName.Equals(typeof(IPatch).FullName))) {
-                        sb.AppendLine($">>>>>>>>>>>>>>>> Hit! Type implementing interface: {typeDefinition.FullName} <<<<<<<<<<<<<<<<<<<<<<<");
+                        sb.AppendLine($">>>>>> Hit! Type implementing interface: {typeDefinition.FullName} <<<<<<<");
                         hit = true;
                     }
                 }
@@ -78,7 +77,7 @@ namespace PatchLoader {
 
             sb.AppendLine("====================================================");
 
-            _logger.Info("Result Interface search:\n" + sb);
+            _logger.Info($"IPatch Interface implementations in [{assemblyDefinition.FullName}]:\n{sb}");
             return hit;
         }
     }

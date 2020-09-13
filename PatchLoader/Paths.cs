@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Utils;
 
@@ -21,6 +22,8 @@ namespace PatchLoader
             ManagedFolderPath = managedFolderPath ?? throw new ArgumentNullException(nameof(managedFolderPath));
             FilesModsPath = filesModsPath ?? throw new ArgumentNullException(nameof(filesModsPath));
             AppDataModsPath = appDataModsPath ?? throw new ArgumentNullException(nameof(appDataModsPath));
+            SkipWorkshop = Environment.GetCommandLineArgs().Any(command => command.Equals("--noWorkshop"));
+            DisableMods = Environment.GetCommandLineArgs().Any(command => command.Equals("--disableMods"));
             SetupLogsDirectoryPath();
         }
 
@@ -74,12 +77,22 @@ namespace PatchLoader
         /// Path to Logs folder
         /// </summary>
         public string LogsPath { get; set; }
+        
+        /// <summary>
+        /// Scan workshop directory mods
+        /// </summary>
+        public bool SkipWorkshop { get; }
+        
+        /// <summary>
+        /// Scan mods
+        /// </summary>
+        public bool DisableMods { get; }
 
         public IEnumerable<string> AllModsFolders()
         {
             yield return AppDataModsPath;
             yield return FilesModsPath;
-            if (WorkshopModsPath != null)
+            if (WorkshopModsPath != null && !SkipWorkshop)
             {
                 yield return WorkshopModsPath;
             }
@@ -103,6 +116,8 @@ namespace PatchLoader
                 .Append("FilesModsPath: ").AppendLine(FilesModsPath)
                 .Append("AppDataModsPath: ").AppendLine(AppDataModsPath)
                 .Append("WorkshopModsPath: ").AppendLine(WorkshopModsPath)
+                .Append("--noWorkshop flag set: ").AppendLine(SkipWorkshop.ToString())
+                .Append("--disableMods flag set: ").AppendLine(DisableMods.ToString())
                 .ToString();
         }
     }

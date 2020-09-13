@@ -24,7 +24,8 @@ namespace PatchLoader
             {
                 IPatch patch = keyValuePair.Value;
                 string assemblyName = patch.PatchTarget.Name;
-
+                string patchFullName = patch.GetType().FullName;
+                PatchStatus status = new PatchStatus(patchFullName, Path.GetDirectoryName(keyValuePair.Key));
                 if (!_assemblies.TryGetValue(assemblyName, out AssemblyDefinition definition))
                 {
                     definition = AssemblyDefinition.ReadAssembly(Path.Combine(paths.ManagedFolderPath, assemblyName + ".dll"));
@@ -33,12 +34,14 @@ namespace PatchLoader
 
                 try
                 {
+                    PatchLoaderStatusInfo.Statuses.Add(status.PatchName, status);
                     _logger.Info($"Executing patch {assemblyName} of {keyValuePair.Key}");
                     _assemblies[assemblyName] = patch.Execute(definition, new WithPrefixLogger(_logger, assemblyName), Path.GetDirectoryName(keyValuePair.Key));
                 }
                 catch (Exception e)
                 {
                     _logger.Exception(e, "Patch caused an exception");
+                    status.SetError(e.ToString());
                 }
             }
 

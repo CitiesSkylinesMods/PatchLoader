@@ -19,8 +19,17 @@ namespace PatchLoader
             _logger = new Logger(PathExtensions.Combine(_paths.LogsPath, "PatchLoader.log"));
             _paths.WorkshopModsPath = GetWorkshopModsPath(_paths.WorkingPath, _logger);
             
-            _logger._Debug(_paths.ToString());
+            _logger.Info("Detected paths:\n" + _paths);
 
+            if (_paths.DisableMods) {
+                _logger.Info("******** Mods loading disabled via --disableMods commandline argument. Further execution aborted ********");
+                return;
+            }
+            
+            if (_paths.SkipWorkshop) {
+                _logger.Info("******** Workshop mods loading disabled via --noWorkshop commandline argument. Processing workshop mods directories will be skipped ********");
+            }
+            
             try {
                 AppDomain.CurrentDomain.TypeResolve += AssemblyResolver;
                 AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolver;
