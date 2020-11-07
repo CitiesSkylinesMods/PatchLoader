@@ -10,6 +10,11 @@ namespace PatchLoader {
             _patchDirectory = patchDirectory;
         }
 
+        public PatchStatus(string patchName, string patchDirectory, string errorMessage): this(patchName, patchDirectory) {
+            _hasError = true;
+            _errorMessage = errorMessage;
+        }
+
         // ReSharper disable once UnusedMember.Global
         public string PatchName {
             get { return _patchName; }
@@ -28,6 +33,7 @@ namespace PatchLoader {
         // ReSharper disable once UnusedMember.Global
         public bool HasError {
             get { return _hasError; }
+            private set { _hasError = value; }
         }
 
         public void SetError(string message) {

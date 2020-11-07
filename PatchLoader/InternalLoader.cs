@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Mono.Cecil;
 using Patch.API;
 using Utils;
 
@@ -20,9 +21,15 @@ namespace PatchLoader {
 
         public void Run()
         {
+            if (!IsGameVersionSupported()) {
+                _logger.Info("******** Game version not supported! Further execution aborted ********");
+                PatchLoaderStatusInfo.Statuses.Add("GameVersion Check", new PatchStatus("GameVersionCheck", "", "Game Version Not Supported!"));
+                return;
+            }
+            
             AppDomain.CurrentDomain.TypeResolve += LocalPatcherAssemblyResolver;
             AppDomain.CurrentDomain.AssemblyResolve += LocalPatcherAssemblyResolver;
-
+            
             var patches = CollectPatches(_paths);
             var patchProcessor = new PatchProcessor(_logger);
             patchProcessor.ProcessPatches(patches, _paths);
@@ -55,6 +62,15 @@ namespace PatchLoader {
             } catch (Exception) {
                 return null;
             }
+        }
+
+        private bool IsGameVersionSupported() {
+            AssemblyDefinition ad = AssemblyDefinition.ReadAssembly(Path.Combine(_paths.ManagedFolderPath, "Assembly-CSharp.dll"));
+            TypeDefinition bc = ad.MainModule.Types.FirstOrDefault(t => t.Name.Equals("BuildConfig"));
+            FieldDefinition versionNumber = bc.Fields.FirstOrDefault(f => f.Name.Equals("APPLICATION_VERSION"));
+            uint value = (uint) versionNumber.Constant;
+            ad.Dispose();
+            return value >= 188997904U;
         }
     }
 }

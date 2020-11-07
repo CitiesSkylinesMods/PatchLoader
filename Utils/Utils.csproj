@@ -42,6 +42,8 @@
     <Compile Include="Config.cs" />
     <Compile Include="ConfigManager.cs" />
     <Compile Include="FakeCallerAttributes.cs" />
+    <Compile Include="FileExtensions.cs" />
+    <Compile Include="GameVersionCheck.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="PatchLoaderStatusInfo.cs" />
     <Compile Include="PatchStatus.cs" />

@@ -3,25 +3,29 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using PatchLoaderMod.DoorstopUpgrade;
 using Utils;
 
 namespace PatchLoaderMod.Doorstop {
     public class LinuxDoorstopManager : DoorstopManager {
+        public override string LoaderMD5 => "bc1a46c8a1da53e03a309b74442cca48";
         public override bool RequiresRestart { get; protected set; } = false;
+        public override bool PlatformSupported => true;
 
         public override string InstallMessage { get; } = "The game will be closed.\n\n" +
                                                          "\tIMPORTANT!\n\n" +
                                                          "To make it work, add './Cities_Loader.sh %command%' (without quotes) to the game Steam Set Launch Options\n" +
                                                          "If game won't launch, remove it to run game normally";
+
         public override string UninstallMessage { get; } = "The game will be closed.\n\n" +
                                                            "\tIMPORTANT!\n\n" +
                                                            "Clear parameters from Steam Set Launch Options if any in order to run game!\n";
 
         private UnixConfigProperties _configProperties = new UnixConfigProperties(
             "#!/bin/sh\n" +
-                    "doorstop_libname=\"doorstop.so\"\n" +
-                    "doorstop_dir=$PWD\n"+
-                    "export LD_LIBRARY_PATH=${doorstop_dir}:${LD_LIBRARY_PATH};\nexport LD_PRELOAD=$doorstop_libname;",
+            "doorstop_libname=\"doorstop.so\"\n" +
+            "doorstop_dir=$PWD\n" +
+            "export LD_LIBRARY_PATH=${doorstop_dir}:${LD_LIBRARY_PATH};\nexport LD_PRELOAD=$doorstop_libname;",
             "export DOORSTOP_ENABLE",
             "export DOORSTOP_INVOKE_DLL_PATH",
             "./Cities.x64"
@@ -31,6 +35,7 @@ namespace PatchLoaderMod.Doorstop {
             logger.Info("Instantiating LinuxDoorstopManager");
             _loaderFileName = "doorstop.so";
             _configFileName = "Cities_Loader.sh";
+            UpgradeManager = new LinuxUpgrade();
         }
 
         protected override string BuildConfig() {
@@ -60,8 +65,7 @@ namespace PatchLoaderMod.Doorstop {
             _logger._Debug("Resource path: " + resourcePath);
 
             using (Stream input = executingAssembly.GetManifestResourceStream(resourcePath))
-            using (Stream output = File.Create("doorstop.so"))
-            {
+            using (Stream output = File.Create("doorstop.so")) {
                 _logger._Debug("Copying stream.");
                 input.CopyStream(output);
             }
@@ -70,18 +74,25 @@ namespace PatchLoaderMod.Doorstop {
         internal void GrantExecuteAccessForConfig() {
             _logger.Info("Trying to grant execute permission to startup script");
             string command = $"chmod +x {_configFileName}";
-            Process proc = new Process ();
+            Process proc = new Process();
             proc.StartInfo.FileName = "/bin/bash";
             proc.StartInfo.Arguments = "-c \" " + command + " \"";
-            proc.StartInfo.UseShellExecute = false; 
+            proc.StartInfo.UseShellExecute = false;
             proc.StartInfo.RedirectStandardOutput = true;
             proc.Start();
             StringBuilder builder = new StringBuilder();
             while (!proc.StandardOutput.EndOfStream) {
-                builder.AppendLine(proc.StandardOutput.ReadLine ());
+                builder.AppendLine(proc.StandardOutput.ReadLine());
             }
+
             _logger.Info("Result:");
             _logger.Info(builder.ToString());
+        }
+        
+        protected override bool IsLatestLoaderVersion() {
+            string loaderHash = FileExtensions.CalculateFileMd5Hash(LoaderFileName);
+            _logger.Info($"Calculated Hash {loaderHash} expected {LoaderMD5}");
+            return LoaderMD5.Equals(loaderHash);
         }
     }
 }
