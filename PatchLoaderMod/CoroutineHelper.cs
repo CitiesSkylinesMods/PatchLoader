@@ -46,6 +46,7 @@ namespace PatchLoaderMod
 
                 yield return new WaitForSeconds(pollInSec);
             }
+            Debug.Log("PATCH_LOADER_EXIT");
 
             if (stopped)
             {

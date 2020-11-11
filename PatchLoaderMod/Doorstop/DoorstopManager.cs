@@ -1,7 +1,10 @@
 using System;
 using System.IO;
 using System.Text;
+using ColossalFramework.UI;
+using PatchLoaderMod.DoorstopUpgrade;
 using UnityEngine;
+using Utils;
 using Logger = Utils.Logger;
 
 namespace PatchLoaderMod.Doorstop {
@@ -10,19 +13,29 @@ namespace PatchLoaderMod.Doorstop {
         protected readonly Logger _logger;
         protected string _loaderFileName;
         protected string _configFileName;
+        public virtual string LoaderMD5 => "";
 
+        public string TempDirName => "Temp_PatchLoader";
         public virtual bool RequiresRestart { get; protected set; } = false;
         
         public virtual string InstallMessage { get; } = "The game must be closed.\nPlease start game once again to fully initialize mod";
         public virtual string UninstallMessage { get; } = "The game must be restarted in order to restore it's original state.";
         
         public virtual bool CanEnable { get; } = true;
-        
+        public virtual bool PlatformSupported { get; } = false;
+
         protected abstract void InstallLoader();
         protected abstract string BuildConfig();
+        protected abstract bool IsLatestLoaderVersion();
         protected abstract ConfigValues InternalLoadConfig(string[] lines);
         
         protected ConfigValues _configValues;
+
+        public IUpgradeManager UpgradeManager { get; protected set; }
+        
+        public string LoaderFileName {
+            get { return _loaderFileName; }
+        }
 
         //Use static factory method 'Create()' for construction.
         protected DoorstopManager(string expectedTargetAssemblyPath, Logger logger) {
@@ -30,7 +43,7 @@ namespace PatchLoaderMod.Doorstop {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public static DoorstopManager Create(string expectedTargetAssemblyPath, Logger logger) {
+        public static DoorstopManager Create(string expectedTargetAssemblyPath, Logger logger, ConfigManager<Config> configManager) {
             DoorstopManager manager = null;
             RuntimePlatform platform = Application.platform;
             if (platform == RuntimePlatform.WindowsPlayer || platform == RuntimePlatform.WindowsEditor) {
@@ -48,6 +61,10 @@ namespace PatchLoaderMod.Doorstop {
             if (manager == null) {
                 throw new PlatformNotSupportedException($"Platform {platform} is not supported!");
             }
+            manager.UpgradeManager.SetLogger(logger);
+            manager.UpgradeManager.SetDoorstopManager(manager);
+            manager.UpgradeManager.SetConfigManager(configManager);
+            manager.UpgradeManager.UpdateState();
 
             if (manager.IsInstalled()) {
                 manager.LoadConfig();
@@ -58,12 +75,16 @@ namespace PatchLoaderMod.Doorstop {
         }
 
         public bool IsInstalled() {
-            return File.Exists(_loaderFileName)
+            return IsLoaderInstalled()
                    && File.Exists(_configFileName);
         }
 
+        public bool IsLoaderInstalled() {
+            return File.Exists(LoaderFileName);
+        }
+
         public void Install() {
-            if (!File.Exists(_loaderFileName)) {
+            if (!File.Exists(LoaderFileName)) {
                 InstallLoader();
             }
 
@@ -106,6 +127,10 @@ namespace PatchLoaderMod.Doorstop {
         private void InstallConfigFile() {
             _configValues = new ConfigValues(true, _expectedTargetAssemblyPath);
             SaveConfig();
+        }
+
+        public bool CheckLoaderVersionVersion() {
+            return IsLatestLoaderVersion();
         }
 
         private void SaveConfig() {
@@ -152,6 +177,15 @@ namespace PatchLoaderMod.Doorstop {
             SaveConfig();
 
             RequiresRestart = true;
+        }
+
+        public void OpenGenericConfirmModal(string message, Action<int> callback) {
+            CoroutineHelper.WaitFor(
+                () => UIView.library != null,
+                success: () => { UIView.library.ShowModal<ConfirmPanel>("ConfirmPanel", (comp, result) => { callback.Invoke(result); }).SetMessage("PatchLoaderMod", message); },
+                failure: () => throw new Exception("PatchLoader could not open an important dialog. Something seems to be seriously broken. Please contact the author."),
+                stopPollingAfterInSec: 30f
+            );
         }
     }
 }

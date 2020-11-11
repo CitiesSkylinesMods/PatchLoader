@@ -19,6 +19,13 @@ namespace Utils
                     File.Delete(_logFilePath);
                 }
             } catch (Exception) {
+                // ignored - other ways to log may be inaccessible(when run before UnityEngine)
+            }
+
+            try {
+                Info($"Logging started [{DateTime.Now:dddd, dd MMMM yyyy HH:mm:ss}]");
+            } catch (Exception) {
+                // ignored - other ways to log may be inaccessible(when run before UnityEngine)
             }
         }
 

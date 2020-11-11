@@ -2,11 +2,14 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using PatchLoaderMod.DoorstopUpgrade;
 using Utils;
 
 namespace PatchLoaderMod.Doorstop {
     public class MacOSDoorstopManager: DoorstopManager {
+        public override string LoaderMD5 => "806bb7ee34f2506de077d6a6b18fec44";
         public override bool RequiresRestart { get; protected set; } = false;
+        public override bool PlatformSupported => false;
         //todo uncomment when fixed
         // public override string InstallMessage { get; } = "The game will be closed.\n\nIMPORTANT!\n\nAdd './Cities_Loader.sh %command%' (without quotes) to the game Steam Set Launch Options";
         public override string InstallMessage { get; } = "\tMacOS IS NOT SUPPORTED YET!\n\n";
@@ -29,6 +32,7 @@ namespace PatchLoaderMod.Doorstop {
             logger.Info("Instantiating MacOSDoorstopManager");
             _loaderFileName = "doorstop.dylib";
             _configFileName = "Cities_Loader.sh";
+            UpgradeManager = new MacOSUpgrade();
         }
 
         protected override string BuildConfig() {
@@ -80,6 +84,10 @@ namespace PatchLoaderMod.Doorstop {
             }
             _logger.Info("Result:");
             _logger.Info(builder.ToString());
+        }
+        
+        protected override bool IsLatestLoaderVersion() {
+            return true;
         }
     }
 }

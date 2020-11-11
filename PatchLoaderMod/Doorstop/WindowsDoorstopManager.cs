@@ -1,10 +1,14 @@
 using System.IO;
 using System.Reflection;
 using System.Text;
+using PatchLoaderMod.DoorstopUpgrade;
 using Utils;
 
 namespace PatchLoaderMod.Doorstop {
-    public partial class WindowsDoorstopManager : DoorstopManager {
+    public class WindowsDoorstopManager : DoorstopManager {
+        public override string LoaderMD5 => "88fcbe634fe023a020fe533814da7840"; //3.0.2.2
+        public override bool PlatformSupported => true;
+        
         private WindowsConfigProperties _configProperties = new WindowsConfigProperties(
             "[UnityDoorstop]",
             "enabled",
@@ -17,6 +21,7 @@ namespace PatchLoaderMod.Doorstop {
             logger.Info("Instantiating WindowsDoorstopManager");
             _loaderFileName = "winhttp.dll";
             _configFileName = "doorstop_config.ini";
+            UpgradeManager = new WindowsUpgrade();
         }
 
         protected override void InstallLoader() {
@@ -37,6 +42,12 @@ namespace PatchLoaderMod.Doorstop {
                 .Append(_configProperties.EnabledStateKey).Append("=").AppendLine(_configValues.Enabled.ToString().ToLower())
                 .Append(_configProperties.TargetAssemblyKey).Append("=").Append(_configValues.TargetAssembly)
                 .ToString();
+        }
+
+        protected override bool IsLatestLoaderVersion() {
+            string loaderHash = FileExtensions.CalculateFileMd5Hash(LoaderFileName);
+            _logger.Info($"Calculated Hash {loaderHash} expected {LoaderMD5}");
+            return LoaderMD5.Equals(loaderHash);
         }
 
         protected override ConfigValues InternalLoadConfig(string[] lines) {
