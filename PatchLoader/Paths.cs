@@ -92,7 +92,7 @@ namespace PatchLoader
         {
             yield return AppDataModsPath;
             yield return FilesModsPath;
-            if (WorkshopModsPath != null && !SkipWorkshop)
+            if (!string.IsNullOrEmpty(WorkshopModsPath) && !SkipWorkshop)
             {
                 yield return WorkshopModsPath;
             }

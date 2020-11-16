@@ -44,7 +44,7 @@ namespace PatchLoaderMod
             
             _patchLoaderConfigFilePath = Path.Combine(DataLocation.applicationBase, "PatchLoader.Config.xml");
             _configManager = new ConfigManager<Config>(_patchLoaderConfigFilePath, _logger);
-
+            _configManager.EnsureCreated(Config.InitialValues());
             var expectedTargetAssemblyPath = PathExtensions.Combine(
                 _pluginInfo.modPath,
                 "PatchLoader",

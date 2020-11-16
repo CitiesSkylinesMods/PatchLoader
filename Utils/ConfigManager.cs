@@ -37,5 +37,11 @@ namespace Utils
                 _xmlSerializer.Serialize(sw, data, _xmlSerializerNamespaces);
             }
         }
+
+        public void EnsureCreated(TC initialData) {
+            if (!File.Exists(_filePath)) {
+                Save(initialData);
+            }
+        }
     }
 }
