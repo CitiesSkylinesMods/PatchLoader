@@ -54,6 +54,7 @@ namespace PatchLoader
             else
             {
                 logger.Info($"File '{configFilePath}' does not exist.");
+                PatchLoaderStatusInfo.Statuses.Add("PatchLoader.Config.xml", new PatchStatus("PatchLoader.Config.xml", workingPath, "Not found! Workshop mods may cause problems"));
                 return null;
             }
         }
