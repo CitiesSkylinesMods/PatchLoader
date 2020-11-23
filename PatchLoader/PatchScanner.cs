@@ -19,20 +19,34 @@ namespace PatchLoader {
 
         public List<KeyValuePair<string, IPatch>> Scan(string path) {
             List<KeyValuePair<string, IPatch>> patches = new List<KeyValuePair<string, IPatch>>();
-            string[] assemblies = new string[0];
+            List<string> assemblies = new List<string>();
             try {
-                assemblies = Directory.GetFiles(path, "*.dll", SearchOption.AllDirectories);
+                string[] directories = Directory.GetDirectories(path, "*");
+                for (var i = 0; i < directories.Length; i++) {
+                    if (!Path.GetFileName(directories[i]).StartsWith("_")) {
+                        assemblies.AddRange(Directory.GetFiles(directories[i], "*.dll", SearchOption.AllDirectories));
+                    } else {
+                        _logger.Info($"Ignored Inactive mod path {directories[i]}");
+                    }
+                }
             } catch (Exception e) {
                 _logger.Exception(e, "Error");
             }
 
-            _logger._Debug("Assemblies:\n" + string.Join("\n", assemblies));
-            for (int i = 0; i < assemblies.Length; i++) {
+            _logger._Debug("Assemblies:\n\t" + string.Join("\n\t", assemblies.ToArray()));
+            for (int i = 0; i < assemblies.Count; i++) {
                 if (ImplementsIPatch(assemblies[i])) {
                     Assembly ResolveEventHandler(object sender, ResolveEventArgs args) => ModDependenciesResolver(sender, args, Directory.GetParent(assemblies[i]).FullName);
                     AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += ResolveEventHandler;
                     try {
-                        Assembly assembly = Assembly.Load(File.ReadAllBytes(assemblies[i]));
+                        Assembly assembly;
+                        if (File.Exists(assemblies[i] + ".mdb")) {
+                            _logger.Info($"Debug symbols found for {assemblies[i]}. Loading assembly with symbols...");
+                            assembly = Assembly.Load(File.ReadAllBytes(assemblies[i]), File.ReadAllBytes(assemblies[i] + ".mdb"));
+                        } else {
+                            assembly = Assembly.Load(File.ReadAllBytes(assemblies[i]));
+                        }
+
                         foreach (var iPatchImpl in assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract && typeof(IPatch).IsAssignableFrom(t)))
                         {
                             ConstructorInfo constructor = iPatchImpl.GetConstructor(Type.EmptyTypes);
@@ -69,7 +83,7 @@ namespace PatchLoader {
             foreach (TypeDefinition typeDefinition in types) {
                 if (typeDefinition.IsClass && !typeDefinition.IsAbstract) {
                     if (typeDefinition.Interfaces.Any(type => type.InterfaceType.FullName.Equals(typeof(IPatch).FullName))) {
-                        sb.AppendLine($">>>>>> Hit! Type implementing interface: {typeDefinition.FullName} <<<<<<<");
+                        sb.AppendLine($">>>>>> Hit! Found Type implementing interface: {typeDefinition.FullName} <<<<<<<");
                         hit = true;
                     }
                 }
