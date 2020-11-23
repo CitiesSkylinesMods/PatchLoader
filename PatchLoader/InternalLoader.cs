@@ -30,9 +30,13 @@ namespace PatchLoader {
             AppDomain.CurrentDomain.TypeResolve += LocalPatcherAssemblyResolver;
             AppDomain.CurrentDomain.AssemblyResolve += LocalPatcherAssemblyResolver;
             
+            _logger.Info(">>>> Collecting patches... <<<<");
             var patches = CollectPatches(_paths);
+            _logger.Info(">>>> Patch collection finished. <<<<");
             var patchProcessor = new PatchProcessor(_logger);
+            _logger.Info(">>>> Processing patches... <<<<");
             patchProcessor.ProcessPatches(patches, _paths);
+            _logger.Info(">>>> Processing finished. <<<<");
 
             AppDomain.CurrentDomain.AssemblyResolve -= LocalPatcherAssemblyResolver;
             AppDomain.CurrentDomain.TypeResolve -= LocalPatcherAssemblyResolver;

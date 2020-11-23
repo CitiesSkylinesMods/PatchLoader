@@ -45,6 +45,7 @@ namespace PatchLoaderMod
             _patchLoaderConfigFilePath = Path.Combine(DataLocation.applicationBase, "PatchLoader.Config.xml");
             _configManager = new ConfigManager<Config>(_patchLoaderConfigFilePath, _logger);
             _configManager.EnsureCreated(Config.InitialValues());
+            
             var expectedTargetAssemblyPath = PathExtensions.Combine(
                 _pluginInfo.modPath,
                 "PatchLoader",
@@ -62,6 +63,7 @@ namespace PatchLoaderMod
                     });
                 return;
             }
+            SaveOrUpdateWorkshopPath();
 
             var config = _configManager.Load();
             if (config.UpgradeInProgress) {
@@ -72,7 +74,6 @@ namespace PatchLoaderMod
 
             if (!_doorstopManager.IsInstalled()) {
                 _doorstopManager.Install();
-                SaveOrUpdateWorkshopPath();
                 UpdateUpgradeStage();
             } else if (_doorstopManager.IsInstalled()
                        && _doorstopManager.UpgradeManager.State == UpgradeState.Latest
@@ -177,27 +178,30 @@ namespace PatchLoaderMod
             _settingsUi?.UpdateStatus();
         }
 
-        //TODO: maybe move into DoorstopManager, but cleanly
         private void SaveOrUpdateWorkshopPath()
         {
+            _logger.Info("Test if workshop path update is required");
             if (_pluginInfo.publishedFileID == PublishedFileId.invalid)
             {
-                _logger.Info("Mod not in workshop folder. Cannot detect workshop directory path. Config not saved.");
+                _logger.Info("Mod not in workshop folder. Cannot detect workshop directory path. Config will not be updated.");
                 return; //not a mod from the workshop folder, so we can give up here.
             }
 
             var workshopPath = Directory.GetParent(PlatformService.workshop.GetSubscribedItemPath(_pluginInfo.publishedFileID)).FullName;
+            _logger.Info($"Workshop path: {workshopPath}");
             if (File.Exists(_patchLoaderConfigFilePath))
             {
                 var config = _configManager.Load();
                 if (config.WorkshopPath != workshopPath)
                 {
+                    _logger.Info($"Detected different workshop path! Old: [{config.WorkshopPath}] New: [{workshopPath}]. Saving...");
                     config.WorkshopPath = workshopPath;
                     _configManager.Save(config);
                 }
             }
             else
             {
+                _logger.Info($"Config does not exist. It should never happen! Creating new config file...");
                 var config = new Config() { WorkshopPath = workshopPath };
                 _configManager.Save(config);
             }
