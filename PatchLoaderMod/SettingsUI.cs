@@ -17,6 +17,11 @@ namespace PatchLoaderMod {
         private UILabel _statusLabel;
         private UIButton _upgradeButton;
         private DoorstopManager _manager;
+        private Utils.Logger _logger;
+
+        public SettingsUi(Utils.Logger logger) {
+            _logger = logger;
+        }
         
         public void CreateUi(UIHelperBase helper, DoorstopManager manager) {
             _manager = manager;
@@ -38,6 +43,8 @@ namespace PatchLoaderMod {
             
             label.text = "Statuses:\n\n" + (builder.Length > 0 ? builder.ToString() : "No patches processed.");
 
+            _logger?.Info("Statuses:\n"+ builder);
+            
             UIHelper loaderGroup = helper.AddGroup("Loader") as UIHelper;
             var uiPanel = loaderGroup.self as UIPanel;
             _statusLabel = uiPanel.AddUIComponent<UILabel>();

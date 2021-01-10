@@ -76,22 +76,29 @@ namespace PatchLoader {
         }
 
         private bool ImplementsIPatch(string file) {
-            AssemblyDefinition assemblyDefinition = AssemblyDefinition.ReadAssembly(file);
-            List<TypeDefinition> types = assemblyDefinition.Modules.SelectMany(m => m.Types).ToList();
             bool hit = false;
-            StringBuilder sb = new StringBuilder();
-            foreach (TypeDefinition typeDefinition in types) {
-                if (typeDefinition.IsClass && !typeDefinition.IsAbstract) {
-                    if (typeDefinition.Interfaces.Any(type => type.InterfaceType.FullName.Equals(typeof(IPatch).FullName))) {
-                        sb.AppendLine($">>>>>> Hit! Found Type implementing interface: {typeDefinition.FullName} <<<<<<<");
-                        hit = true;
+            try {
+                AssemblyDefinition assemblyDefinition = AssemblyDefinition.ReadAssembly(file);
+                List<TypeDefinition> types = assemblyDefinition.Modules.SelectMany(m => m.Types).ToList();
+                StringBuilder sb = new StringBuilder();
+                foreach (TypeDefinition typeDefinition in types) {
+                    if (typeDefinition.IsClass && !typeDefinition.IsAbstract) {
+                        if (typeDefinition.Interfaces.Any(type => type.InterfaceType.FullName.Equals(typeof(IPatch).FullName))) {
+                            sb.AppendLine($">>>>>> Hit! Found Type implementing interface: {typeDefinition.FullName} <<<<<<<");
+                            hit = true;
+                        }
                     }
                 }
+
+                sb.AppendLine("====================================================");
+
+                _logger.Info($"IPatch Interface implementations in [{assemblyDefinition.FullName}]:\n{sb}");
+            } catch (Exception e) {
+                _logger.Exception(e, $"!!! - Exception while scanning file [{file}] - !!!");
+                string fileName = Path.GetFileName(file);
+                PatchLoaderStatusInfo.Statuses.Add(fileName, new PatchStatus(fileName, file, "Exception while scanning"));
             }
 
-            sb.AppendLine("====================================================");
-
-            _logger.Info($"IPatch Interface implementations in [{assemblyDefinition.FullName}]:\n{sb}");
             return hit;
         }
     }

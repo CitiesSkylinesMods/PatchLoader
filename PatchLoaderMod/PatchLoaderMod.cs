@@ -236,7 +236,7 @@ namespace PatchLoaderMod
         // ReSharper disable once InconsistentNaming
         public void OnSettingsUI(UIHelperBase helper)
         {
-            _settingsUi = new SettingsUi();
+            _settingsUi = new SettingsUi(_logger);
             _settingsUi.CreateUi(helper, _doorstopManager);
         }
         internal static  void ShowExceptionModal(string message, Action callback, string title = "PatchLoaderMod")
