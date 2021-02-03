@@ -9,8 +9,7 @@ namespace PatchLoaderMod.DoorstopUpgrade {
         public UpgradeState State { get; private set; }
 
         public void UpdateState() {
-            _logger.Error("Update State not implemented for MacOS");
-            State = UpgradeState.Error;
+            State = UpgradeState.Latest;
         }
 
         public void SetDoorstopManager(DoorstopManager manager) {
