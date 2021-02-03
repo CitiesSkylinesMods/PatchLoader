@@ -20,7 +20,8 @@ namespace Patch.API
         /// <param name="assemblyDefinition">Assembly definition</param>
         /// <param name="logger">Logger wrapper</param>
         /// <param name="patcherWorkingPath">Patcher directory path - Assembly.GetExecutingAssembly().Location return null (because of )</param>
+        /// <param name="managedDirectoryPath">Managed directory path - path to directory with all game assemblies(completely different on MacOS)</param>
         /// <returns>Modified AssemblyDefinition, used for further processing</returns>
-        AssemblyDefinition Execute(AssemblyDefinition assemblyDefinition, ILogger logger, string patcherWorkingPath);
+        AssemblyDefinition Execute(AssemblyDefinition assemblyDefinition, ILogger logger, string patcherWorkingPath, string managedDirectoryPath);
     }
 }
