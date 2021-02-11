@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Patch.API;
 using Utils;
 
 namespace PatchLoader {
-    public class Paths {
+    public class Paths : IPaths {
         //use static factory method 'Create()' instead
         private Paths(
             string workingPath,

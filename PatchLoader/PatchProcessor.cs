@@ -36,7 +36,7 @@ namespace PatchLoader
                 {
                     PatchLoaderStatusInfo.Statuses.Add(status.PatchName, status);
                     _logger.Info($"Executing patch {assemblyName} of {keyValuePair.Key}\n");
-                    _assemblies[assemblyName] = patch.Execute(definition, new WithPrefixLogger(_logger, assemblyName), Path.GetDirectoryName(keyValuePair.Key), paths.ManagedFolderPath);
+                    _assemblies[assemblyName] = patch.Execute(definition, new WithPrefixLogger(_logger, assemblyName), Path.GetDirectoryName(keyValuePair.Key), paths);
                 }
                 catch (Exception e)
                 {
