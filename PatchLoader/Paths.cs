@@ -45,7 +45,7 @@ namespace PatchLoader {
 
             var appDataModsPath = "";
             if (isMac) {
-                appDataModsPath = PathExtensions.Combine(new DirectoryInfo(workingPath).Parent.Parent.FullName, "Addons", "Mods");
+                appDataModsPath = PathExtensions.Combine(new DirectoryInfo(workingPath).Parent.Parent.Parent.Parent.Parent.Parent.FullName, "Colossal Order", "Cities_Skylines", "Addons", "Mods");
             } else {
                 appDataModsPath = PathExtensions.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Colossal Order", "Cities_Skylines", "Addons", "Mods");
             }
