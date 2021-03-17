@@ -19,6 +19,11 @@ namespace Patch.API {
         /// Path to game's directory Mods folder
         /// </summary>
         string FilesModsPath { get; }
+        
+        /// <summary>
+        /// Path to user AppData folder.
+        /// </summary>
+        string AppDataPath { get; }
 
         /// <summary>
         /// Path to user AppData mods folder.

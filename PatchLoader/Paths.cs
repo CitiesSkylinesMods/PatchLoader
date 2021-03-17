@@ -14,11 +14,13 @@ namespace PatchLoader {
             string loaderPath,
             string managedFolderPath,
             string filesModsPath,
+            string appDataPath,
             string appDataModsPath) {
             WorkingPath = workingPath ?? throw new ArgumentNullException(nameof(workingPath));
             LoaderPath = loaderPath ?? throw new ArgumentNullException(nameof(loaderPath));
             ManagedFolderPath = managedFolderPath ?? throw new ArgumentNullException(nameof(managedFolderPath));
             FilesModsPath = filesModsPath ?? throw new ArgumentNullException(nameof(filesModsPath));
+            AppDataPath = appDataPath ?? throw new ArgumentNullException(nameof(appDataPath));
             AppDataModsPath = appDataModsPath ?? throw new ArgumentNullException(nameof(appDataModsPath));
             SkipWorkshop = Environment.GetCommandLineArgs().Any(command => command.Equals("--noWorkshop"));
             DisableMods = Environment.GetCommandLineArgs().Any(command => command.Equals("--disableMods"));
@@ -42,19 +44,22 @@ namespace PatchLoader {
             } else {
                 filesModsPath = PathExtensions.Combine(workingPath, "Files", "Mods");
             }
-
-            var appDataModsPath = "";
+            
+            var appDataPath = "";
             if (isMac) {
-                appDataModsPath = PathExtensions.Combine(new DirectoryInfo(workingPath).Parent.Parent.Parent.Parent.Parent.Parent.FullName, "Colossal Order", "Cities_Skylines", "Addons", "Mods");
+                appDataPath = PathExtensions.Combine(new DirectoryInfo(workingPath).Parent.Parent.Parent.Parent.Parent.Parent.FullName, "Colossal Order", "Cities_Skylines");
             } else {
-                appDataModsPath = PathExtensions.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Colossal Order", "Cities_Skylines", "Addons", "Mods");
+                appDataPath = PathExtensions.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Colossal Order", "Cities_Skylines");
             }
+
+            var appDataModsPath = PathExtensions.Combine(appDataPath, "Addons", "Mods");
 
             return new Paths(
                 workingPath,
                 loaderPath,
                 managedFolderPath,
                 filesModsPath,
+                appDataPath,
                 appDataModsPath);
         }
 
@@ -82,6 +87,11 @@ namespace PatchLoader {
         /// Path to user AppData mods folder.
         /// </summary>
         public string AppDataModsPath { get; }
+
+        /// <summary>
+        /// Path to user AppData folder.
+        /// </summary>
+        public string AppDataPath { get; }
 
         /// <summary>
         /// Path to Workshop mods folder.

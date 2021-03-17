@@ -33,6 +33,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyToPatch.cs" />
+    <Compile Include="Helpers\GameStateUtil.cs" />
+    <Compile Include="Helpers\IGameState.cs" />
     <Compile Include="ILogger.cs" />
     <Compile Include="IPatch.cs" />
     <Compile Include="IPaths.cs" />
