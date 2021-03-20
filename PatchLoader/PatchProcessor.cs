@@ -23,27 +23,37 @@ namespace PatchLoader
             foreach (KeyValuePair<string, IPatch> keyValuePair in patches)
             {
                 IPatch patch = keyValuePair.Value;
-                string assemblyName = patch.PatchTarget.Name;
+                string assemblyName = patch.PatchTarget?.Name;
                 string patchFullName = patch.GetType().FullName;
                 PatchStatus status = new PatchStatus(patchFullName, Path.GetDirectoryName(keyValuePair.Key));
-                if (!_assemblies.TryGetValue(assemblyName, out AssemblyDefinition definition))
-                {
-                    definition = AssemblyDefinition.ReadAssembly(Path.Combine(paths.ManagedFolderPath, assemblyName + ".dll"));
-                    _assemblies.Add(assemblyName, definition);
-                }
+                if (string.IsNullOrEmpty(assemblyName)) {
+                    try {
+                        PatchLoaderStatusInfo.Statuses.Add(status.PatchName, status);
+                        _logger.Info($"Executing <NULL> patch of {keyValuePair.Key}\n");
+                        patch.Execute(null, new WithPrefixLogger(_logger, "<NULL>"), Path.GetDirectoryName(keyValuePair.Key), paths);
+                    } catch (Exception e) {
+                        _logger.Exception(e, "Patch caused an exception");
+                        status.SetError(e.ToString());
+                    }
+                } else {
 
-                try
-                {
-                    PatchLoaderStatusInfo.Statuses.Add(status.PatchName, status);
-                    _logger.Info($"Executing patch {assemblyName} of {keyValuePair.Key}\n");
-                    _assemblies[assemblyName] = patch.Execute(definition, new WithPrefixLogger(_logger, assemblyName), Path.GetDirectoryName(keyValuePair.Key), paths);
-                }
-                catch (Exception e)
-                {
-                    _logger.Exception(e, "Patch caused an exception");
-                    status.SetError(e.ToString());
+                    if (!_assemblies.TryGetValue(assemblyName, out AssemblyDefinition definition)) {
+                        definition = AssemblyDefinition.ReadAssembly(Path.Combine(paths.ManagedFolderPath, assemblyName + ".dll"));
+                        _assemblies.Add(assemblyName, definition);
+                    }
+
+                    try {
+                        PatchLoaderStatusInfo.Statuses.Add(status.PatchName, status);
+                        _logger.Info($"Executing patch {assemblyName} of {keyValuePair.Key}\n");
+                        _assemblies[assemblyName] = patch.Execute(definition, new WithPrefixLogger(_logger, assemblyName), Path.GetDirectoryName(keyValuePair.Key), paths);
+                    } catch (Exception e) {
+                        _logger.Exception(e, "Patch caused an exception");
+                        status.SetError(e.ToString());
+                    }
                 }
             }
+            
+            _logger.Info(">>>>>>>>>> Finished processing patches. Loading patched assemblies... <<<<<<<<<<");
 
             foreach (KeyValuePair<string, AssemblyDefinition> keyValuePair in _assemblies)
             {
