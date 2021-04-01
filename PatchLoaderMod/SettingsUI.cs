@@ -32,18 +32,31 @@ namespace PatchLoaderMod {
             label.processMarkup = true;
             
             StringBuilder builder = new StringBuilder();
+            StringBuilder internalBuilder = new StringBuilder();
+            bool anyError = false;
             foreach (KeyValuePair<string,PatchStatus> patchStatus in PatchLoaderStatusInfo.Statuses) {
-                builder.Append("   ")
+                if (patchStatus.Value.HasError) {
+                    anyError = true;
+                    builder.Append("   ")
+                        .Append(patchStatus.Key)
+                        .Append(": <color ").Append(colorError).Append(">")
+                        .Append("Error (").Append(patchStatus.Value.ErrorMessage).AppendLine(") </color>");
+                }
+                internalBuilder.Append("   ")
                     .Append(patchStatus.Key)
-                    .Append(": <color ").Append(patchStatus.Value.HasError ? colorError : colorOk).Append(">")
-                    .Append(patchStatus.Value.HasError ? "Error (" : "OK")
+                    .Append(patchStatus.Value.HasError ? ": Error (" : ": OK")
                     .Append(patchStatus.Value.HasError ? patchStatus.Value.ErrorMessage : "")
-                    .AppendLine(patchStatus.Value.HasError ? ") </color>" : "</color>");
+                    .AppendLine(patchStatus.Value.HasError ? ")" : "");
+            }
+
+            if (!anyError && PatchLoaderStatusInfo.Statuses.Count > 0) {
+                builder.Append("   ")
+                    .Append("<color").Append(colorOk).Append(">").Append("All patches applied correctly").AppendLine("</color>").AppendLine();
             }
             
-            label.text = "Statuses:\n\n" + (builder.Length > 0 ? builder.ToString() : "No patches processed.");
+            label.text = "Statuses:\n\n" + (PatchLoaderStatusInfo.Statuses.Count > 0 ? builder.ToString() : "No patches processed.\n");
 
-            _logger?.Info("Statuses:\n"+ builder);
+            _logger?.Info("Statuses:\n"+ internalBuilder);
             
             UIHelper loaderGroup = helper.AddGroup("Loader") as UIHelper;
             var uiPanel = loaderGroup.self as UIPanel;
@@ -51,6 +64,15 @@ namespace PatchLoaderMod {
             _statusLabel.processMarkup = true;
             _upgradeButton = loaderGroup.AddButton("Upgrade", OnUpgrade) as UIButton;
             UpdateStatus();
+        }
+
+        public void CreateUiNotSupported(UIHelperBase helper) {
+            var uiHelper = helper as UIHelper;
+            var panel = uiHelper.self as UIScrollablePanel;
+            var label = panel.AddUIComponent<UILabel>();
+            label.relativePosition = new Vector3(10, 0, 10);
+            label.processMarkup = true;
+            label.text = $"<color {colorError}>Game version not supported!</color>";
         }
 
         private void OnUpgrade() {

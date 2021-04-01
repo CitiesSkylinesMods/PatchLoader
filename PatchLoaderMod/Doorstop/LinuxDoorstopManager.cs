@@ -14,12 +14,23 @@ namespace PatchLoaderMod.Doorstop {
 
         public override string InstallMessage { get; } = "The game will be closed.\n\n" +
                                                          "\tIMPORTANT!\n\n" +
-                                                         "To make it work, add './Cities_Loader.sh %command%' (without quotes) to the game Steam Set Launch Options\n" +
-                                                         "If game won't launch, remove it to run game normally";
+                                                         "If you use Paradox game launcher:\n" +
+                                                         "  1. Open main game directory and search for launcher-settings.json\n" +
+                                                         "  2. Make backup of that file (e.g. create copy with different name)\n" +
+                                                         "  3. Open launcher-settings.json with any text editor and change\n" +
+                                                         "  'exePath' value to './Cities_Loader.sh' ('Cities.x64' is the default)\n" +
+                                                         "  4. Save file and run game normally\n\n" +
+                                                         "---------------------------------------------------------------------\n" +
+                                                         "If you don't use Paradox game launcher:\n" +
+                                                         "  1. Add './Cities_Loader.sh %command%' (without quotes) to the game Steam Set Launch Options\n" +
+                                                         "  2. Run game normally\n" +
+                                                         "---------------------------------------------------------------------\n" +
+                                                         "If game won't launch, remove parameter or restore backup launcher-settings.json to run game normally\n" +
+                                                         "and contact the mod author for more solutions";
 
         public override string UninstallMessage { get; } = "The game will be closed.\n\n" +
                                                            "\tIMPORTANT!\n\n" +
-                                                           "Clear parameters from Steam Set Launch Options if any in order to run game!\n";
+                                                           "Clear parameters from Steam Set Launch Options if any or restore backup launcher-settings.json\n in order to run game!\n";
 
         private UnixConfigProperties _configProperties = new UnixConfigProperties(
             "#!/bin/sh\n" +
@@ -28,7 +39,7 @@ namespace PatchLoaderMod.Doorstop {
             "export LD_LIBRARY_PATH=${doorstop_dir}:${LD_LIBRARY_PATH};\nexport LD_PRELOAD=$doorstop_libname;",
             "export DOORSTOP_ENABLE",
             "export DOORSTOP_INVOKE_DLL_PATH",
-            "./Cities.x64"
+            "./Cities.x64 $@"
         );
 
         public LinuxDoorstopManager(string expectedTargetAssemblyPath, Logger logger) : base(expectedTargetAssemblyPath, logger) {

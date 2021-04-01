@@ -21,11 +21,13 @@ namespace PatchLoaderMod
         private string _patchLoaderConfigFilePath;
         private ConfigManager<Config> _configManager;
 
-        public string Name => "Patch Loader Mod";
+        public string Name => "Patch Loader Mod v2.0";
         public string Description => "Automatically loads Patches implementing IPatch API.";
         private SettingsUi _settingsUi;
+        private static bool gameVersionSupported = true;
         public void OnEnabled()
         {
+            gameVersionSupported = true;
             _pluginInfo = PluginManager.instance.FindPluginInfo(Assembly.GetExecutingAssembly());
             EnsureLogsDirectoryCreated();
             _logger = new Utils.Logger(Path.Combine(Path.Combine(Application.dataPath, "Logs"), "PatchLoaderMod.log"));
@@ -33,6 +35,7 @@ namespace PatchLoaderMod
             _logger.Info($"Detected game version {gameVersion} from string [{BuildConfig.applicationVersion}]");
             if (!GameVersionCheck.IsGameVersionSupported(gameVersion)) {
                 _logger.Error($"Game version is not supported! ({BuildConfig.applicationVersion})");
+                gameVersionSupported = false;
                 ShowExceptionModal($"The '{Name}'\nGame version is not supported!\n\n" +
                                    "Mod will disable itself.\n" +
                                    "Update game to the latest version and try again or remove/unsubscribe mod.\n",
@@ -87,6 +90,7 @@ namespace PatchLoaderMod
 
             if (_doorstopManager.RequiresRestart) {
                 ShowRestartGameModal($"The '{Name}' was installed.\n{_doorstopManager.InstallMessage}");
+                Debug.Log($"The '{Name}' was installed.\n{_doorstopManager.InstallMessage}");
             }
             Debug.Log("PatchLoader enabled");
         }
@@ -237,8 +241,13 @@ namespace PatchLoaderMod
         public void OnSettingsUI(UIHelperBase helper)
         {
             _settingsUi = new SettingsUi(_logger);
-            _settingsUi.CreateUi(helper, _doorstopManager);
+            if (gameVersionSupported) {
+                _settingsUi.CreateUi(helper, _doorstopManager);
+            } else {
+                _settingsUi.CreateUiNotSupported(helper);
+            }
         }
+        
         internal static  void ShowExceptionModal(string message, Action callback, string title = "PatchLoaderMod")
         {
             CoroutineHelper.WaitFor(
