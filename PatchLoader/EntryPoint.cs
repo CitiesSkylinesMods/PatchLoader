@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using Patch.API.Helpers;
+using PatchLoader.Helpers;
 using Utils;
 using Logger = Utils.Logger;
 
@@ -29,6 +31,10 @@ namespace PatchLoader
             if (_paths.SkipWorkshop) {
                 _logger.Info("******** Workshop mods loading disabled via --noWorkshop commandline argument. Processing workshop mods directories will be skipped ********");
             }
+            
+            SettingsFile.Logger = new WithPrefixLogger(_logger, "PatchLoader.SettingsFile");
+            SettingsFile.LocalAppDataPath = _paths.AppDataPath;
+            GameStateUtil.Util = new GameState();
             
             try {
                 AppDomain.CurrentDomain.TypeResolve += AssemblyResolver;

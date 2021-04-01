@@ -98,8 +98,7 @@ namespace PatchLoaderMod.Doorstop {
                     (this as LinuxDoorstopManager)?.GrantExecuteAccessForConfig();
                     RequiresRestart = true;
                 } else if (platform == RuntimePlatform.OSXPlayer) {
-                    //todo add support for MacOS
-                    //(this as MacOSDoorstopManager)?.GrantExecuteAccessForConfig();
+                    (this as MacOSDoorstopManager)?.GrantExecuteAccessForConfig();
                 }
             } else {
                 RequiresRestart = true;

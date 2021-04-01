@@ -39,6 +39,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EntryPoint.cs" />
+    <Compile Include="Helpers\GameState.cs" />
+    <Compile Include="Helpers\SavedBool.cs" />
+    <Compile Include="Helpers\SavedFloat.cs" />
+    <Compile Include="Helpers\SavedInt.cs" />
+    <Compile Include="Helpers\SavedString.cs" />
+    <Compile Include="Helpers\SavedValue.cs" />
+    <Compile Include="Helpers\SettingsFile.cs" />
     <Compile Include="InternalLoader.cs" />
     <Compile Include="PatchProcessor.cs" />
     <Compile Include="PatchScanner.cs" />

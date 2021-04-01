@@ -24,7 +24,7 @@ namespace PatchLoader {
                 string[] directories = Directory.GetDirectories(path, "*");
                 for (var i = 0; i < directories.Length; i++) {
                     if (!Path.GetFileName(directories[i]).StartsWith("_")) {
-                        assemblies.AddRange(Directory.GetFiles(directories[i], "*.dll", SearchOption.AllDirectories));
+                        assemblies.AddRange(GetFiles(directories[i], "*.ipatch", SearchOption.AllDirectories));
                     } else {
                         _logger.Info($"Ignored Inactive mod path {directories[i]}");
                     }
@@ -100,6 +100,16 @@ namespace PatchLoader {
             }
 
             return hit;
+        }
+        
+        public static string[] GetFiles(string path, string searchPattern, SearchOption searchOption)
+        {
+            string[] searchPatterns = searchPattern.Split('|');
+            List<string> files = new List<string>();
+            foreach (string sp in searchPatterns)
+                files.AddRange(Directory.GetFiles(path, sp, searchOption));
+            files.Sort();
+            return files.ToArray();
         }
     }
 }
