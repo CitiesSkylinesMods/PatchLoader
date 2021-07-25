@@ -19,12 +19,12 @@ namespace PatchLoaderMod.Doorstop {
                                                          "  1. Open main game directory (Cities.app) navigate to " +
                                                          "     /Contents/Launcher directory and search for launcher-settings.json\n" +
                                                          "  2. Make backup of that file (e.g. create copy with different name)\n" +
-                                                         "  3. Open launcher-settings.json with any text editor and change" +
+                                                         "  3. Open launcher-settings.json using any text editor and change" +
                                                          " 'exePath' value to '../../../Cities_Loader.sh' instead of" +
-                                                         " original '../MacOS/Cities' instead of original '../MacOS/Cities'\n" +
+                                                         " original '../MacOS/Cities'\n" +
                                                          "  4. Save file and run game normally\n\n" +
                                                          "---------------------------------------------------------------------\n" +
-                                                         "If don't use Paradox game launcher:\n" +
+                                                         "Or if don't use Paradox game launcher:\n" +
                                                          "  1. Add './Cities_Loader.sh %command%' (without quotes) to the game Steam Set Launch Options\n" +
                                                          "    in the Steam Client\n" +
                                                          "  2. Run game normally\n" +
@@ -56,7 +56,7 @@ namespace PatchLoaderMod.Doorstop {
         protected override string BuildConfig() {
             return new StringBuilder()
                 .AppendLine(_configProperties.Header)
-                .Append(_configProperties.PreloadKey).Append("=").Append(ExtractInsertLibEnvVariable()).Append(":").AppendLine("$doorstop_libname;")
+                .Append(_configProperties.PreloadKey).AppendLine("=$doorstop_libname;;")
                 .Append(_configProperties.EnabledStateKey).Append("=").Append(_configValues.Enabled.ToString().ToUpper()).AppendLine(";")
                 .Append(_configProperties.TargetAssemblyKey).Append("=\"").Append(_configValues.TargetAssembly).AppendLine("\";")
                 .Append(_configProperties.GameExePath)
@@ -85,7 +85,7 @@ namespace PatchLoaderMod.Doorstop {
 
             _logger.Info($"Loader config parsing complete. Status: [{(enabled ? "enabled" : "disabled")}] Loader assembly path [{targetAssembly}] PreloadValue [{preloadValue}]");
 
-            return new ConfigValues(enabled, targetAssembly, !preloadValue.Contains("Application Support"));
+            return new ConfigValues(enabled, targetAssembly, false/*todo !preloadValue.Contains("Application Support")*/);
         }
 
         protected override void InstallLoader() {

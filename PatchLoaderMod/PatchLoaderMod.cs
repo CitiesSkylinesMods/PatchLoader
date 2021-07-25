@@ -10,6 +10,7 @@ using PatchLoaderMod.Doorstop;
 using PatchLoaderMod.DoorstopUpgrade;
 using UnityEngine;
 using Utils;
+using Logger = Utils.Logger;
 
 namespace PatchLoaderMod
 {
@@ -21,7 +22,7 @@ namespace PatchLoaderMod
         private string _patchLoaderConfigFilePath;
         private ConfigManager<Config> _configManager;
 
-        public string Name => "Patch Loader Mod v2.0";
+        public string Name => "Patch Loader Mod v2.1";
         public string Description => "Automatically loads Patches implementing IPatch API.";
         private SettingsUi _settingsUi;
         private static bool gameVersionSupported = true;
@@ -89,7 +90,7 @@ namespace PatchLoaderMod
             }
 
             if (_doorstopManager.RequiresRestart) {
-                ShowRestartGameModal($"The '{Name}' was installed.\n{_doorstopManager.InstallMessage}");
+                ShowRestartGameModal($"The '{Name}' was installed.\n{_doorstopManager.InstallMessage}", logger: _logger);
                 Debug.Log($"The '{Name}' was installed.\n{_doorstopManager.InstallMessage}");
             }
             Debug.Log("PatchLoader enabled");
@@ -213,18 +214,14 @@ namespace PatchLoaderMod
 
         public void OnDisabled()
         {
-            if (Application.platform == RuntimePlatform.OSXPlayer) {
-                Debug.Log("PatchLoader disabled");
-                return;
-            }
-
             if (_doorstopManager != null) {
                 if (_doorstopManager.IsInstalled() && !_pluginInfo.isEnabled) {
                     _doorstopManager.Disable();
                 }
 
                 if (_doorstopManager.RequiresRestart) {
-                    ShowRestartGameModal($"The '{Name}' was uninstalled.\n{_doorstopManager.UninstallMessage}");
+                    ShowRestartGameModal($"The '{Name}' was uninstalled.\n{_doorstopManager.UninstallMessage}", logger: _logger);
+                   Debug.Log($"The '{Name}' was uninstalled \n{_doorstopManager.InstallMessage}");
                 }
 
                 _doorstopManager = null;
@@ -267,8 +264,9 @@ namespace PatchLoaderMod
             );
         }
         
-        internal static void ShowRestartGameModal(string message, string title = "PatchLoaderMod")
+        internal static void ShowRestartGameModal(string message, string title = "PatchLoaderMod", Logger logger = null)
         {
+            logger?.Info($"[ShowRestartGameModal - {title}] {message}");
             CoroutineHelper.WaitFor(
                 () => UIView.library != null,
                 success: () =>
