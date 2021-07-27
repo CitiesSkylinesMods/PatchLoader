@@ -167,10 +167,10 @@ namespace PatchLoaderMod.Doorstop {
         }
 
         private void RestoreTargetAssemblyPathIfNecessary() {
-            if (_configValues.TargetAssembly == _expectedTargetAssemblyPath)
+            if (_configValues.TargetAssembly == _expectedTargetAssemblyPath && !_configValues.RequiresReset)
                 return;
 
-            _logger.Info("Updating Loader config with new path location");
+            _logger.Info("Updating Loader config with new path location. " + $"{(_configValues.RequiresReset? "[Resetting...]" :"")}");
 
             _configValues.TargetAssembly = _expectedTargetAssemblyPath;
             SaveConfig();

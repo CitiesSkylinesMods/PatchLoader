@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Patch.API;
 using Utils;
@@ -29,7 +30,8 @@ namespace PatchLoader {
 
         public static Paths Create() {
             var workingPath = "";
-            bool isMac = Environment.GetEnvironmentVariable("DOORSTOP_MANAGED_FOLDER_DIR").Contains("Application Support");
+            
+            bool isMac = Environment.GetEnvironmentVariable("DOORSTOP_MANAGED_FOLDER_DIR").Contains("Cities.app");
             if (isMac) {
                 workingPath = new DirectoryInfo(Environment.GetEnvironmentVariable("DOORSTOP_MANAGED_FOLDER_DIR")).Parent?.Parent?.Parent?.FullName;
             } else {
@@ -123,7 +125,8 @@ namespace PatchLoader {
 
         private void SetupLogsDirectoryPath() {
             string managedParent = "";
-            if (ManagedFolderPath.Contains("Application Support")) {
+            if (ManagedFolderPath.Contains("Cities.app")) {
+                //MacOS
                 managedParent = new DirectoryInfo(ManagedFolderPath).Parent.Parent.Parent.FullName;
             } else {
                 managedParent = new DirectoryInfo(ManagedFolderPath).Parent.FullName;

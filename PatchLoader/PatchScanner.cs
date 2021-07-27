@@ -69,7 +69,7 @@ namespace PatchLoader {
             AssemblyName name = new AssemblyName(args.Name);
             _logger._Debug("Resolving local assembly " + args.Name);
             try {
-                return Assembly.LoadFile(Path.Combine(path, $"{name.Name}.dll"));
+                return Assembly.Load(File.ReadAllBytes(Path.Combine(path, $"{name.Name}.dll")));
             } catch (Exception) {
                 return null;
             }
