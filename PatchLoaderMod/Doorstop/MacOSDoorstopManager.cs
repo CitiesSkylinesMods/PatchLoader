@@ -56,7 +56,7 @@ namespace PatchLoaderMod.Doorstop {
         protected override string BuildConfig() {
             return new StringBuilder()
                 .AppendLine(_configProperties.Header)
-                .Append(_configProperties.PreloadKey).AppendLine("=$doorstop_libname;;")
+                .Append(_configProperties.PreloadKey).AppendLine("=$doorstop_libname;")
                 .Append(_configProperties.EnabledStateKey).Append("=").Append(_configValues.Enabled.ToString().ToUpper()).AppendLine(";")
                 .Append(_configProperties.TargetAssemblyKey).Append("=\"").Append(_configValues.TargetAssembly).AppendLine("\";")
                 .Append(_configProperties.GameExePath)
