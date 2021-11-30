@@ -23,8 +23,8 @@ namespace PatchLoader {
             FilesModsPath = filesModsPath ?? throw new ArgumentNullException(nameof(filesModsPath));
             AppDataPath = appDataPath ?? throw new ArgumentNullException(nameof(appDataPath));
             AppDataModsPath = appDataModsPath ?? throw new ArgumentNullException(nameof(appDataModsPath));
-            SkipWorkshop = Environment.GetCommandLineArgs().Any(command => command.Equals("--noWorkshop"));
-            DisableMods = Environment.GetCommandLineArgs().Any(command => command.Equals("--disableMods"));
+            SkipWorkshop = Environment.GetCommandLineArgs().Any(command => command.Contains("-noWorkshop"));
+            DisableMods = Environment.GetCommandLineArgs().Any(command => command.Contains("-disableMods"));
             SetupLogsDirectoryPath();
         }
 
@@ -49,7 +49,7 @@ namespace PatchLoader {
             
             var appDataPath = "";
             if (isMac) {
-                appDataPath = PathExtensions.Combine(new DirectoryInfo(workingPath).Parent.Parent.Parent.Parent.Parent.Parent.FullName, "Colossal Order", "Cities_Skylines");
+                appDataPath = PathExtensions.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library"), "Application Support", "Colossal Order", "Cities_Skylines");
             } else {
                 appDataPath = PathExtensions.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Colossal Order", "Cities_Skylines");
             }

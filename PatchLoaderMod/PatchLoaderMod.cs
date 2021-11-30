@@ -22,7 +22,7 @@ namespace PatchLoaderMod
         private string _patchLoaderConfigFilePath;
         private ConfigManager<Config> _configManager;
 
-        public string Name => "Patch Loader Mod v2.1.1";
+        public string Name => "Patch Loader Mod v2.1.2";
         public string Description => "Automatically loads Patches implementing IPatch API.";
         private SettingsUi _settingsUi;
         private static bool gameVersionSupported = true;
