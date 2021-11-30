@@ -18,7 +18,7 @@ namespace PatchLoaderMod.Doorstop {
                                                          "  1. Open main game directory and search for launcher-settings.json\n" +
                                                          "  2. Make backup of that file (e.g. create copy with different name)\n" +
                                                          "  3. Open launcher-settings.json with any text editor and change\n" +
-                                                         "  'exePath' value to './Cities_Loader.sh' ('Cities.x64' is the default)\n" +
+                                                         "  'exePath' value to 'Cities_Loader.sh' ('Cities.x64' is the default)\n" +
                                                          "  4. Save file and run game normally\n\n" +
                                                          "---------------------------------------------------------------------\n" +
                                                          "If you don't use Paradox game launcher:\n" +
