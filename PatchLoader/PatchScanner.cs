@@ -17,21 +17,75 @@ namespace PatchLoader {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public List<KeyValuePair<string, IPatch>> Scan(string path) {
+        public List<KeyValuePair<string, IPatch>> Scan(IEnumerable<string> paths) {
+            bool ignoreExcluded = false;
+            List<KeyValuePair<string, List<KeyValuePair<ModDirStatus, string>>>> directoriesPerPath = new List<KeyValuePair<string, List<KeyValuePair<ModDirStatus, string>>>>();  
+            foreach (string path in paths)
+            {
+                List<KeyValuePair<ModDirStatus, string>> modDirectories = new List<KeyValuePair<ModDirStatus, string>>();
+                directoriesPerPath.Add(new KeyValuePair<string, List<KeyValuePair<ModDirStatus, string>>>(path, modDirectories));
+                try {
+                    string[] directories = Directory.GetDirectories(path, "*");
+                    for (var i = 0; i < directories.Length; i++) {
+                        string directoryPath = directories[i];
+                        if (!Path.GetFileName(directoryPath).StartsWith("_")) {
+                            string[] files = GetFiles(directoryPath, "*.ipatch", SearchOption.AllDirectories);
+                            if (files.Length == 0) {
+                                // no patch files, continue
+                                continue;
+                            }
+
+                            bool mayExclude = File.Exists(Path.Combine(directoryPath, ".excluded"));
+
+                            if (!ignoreExcluded && files.Any(f => f.Contains("LoadOrder"))) {
+                                ignoreExcluded = true;
+                                mayExclude = false;
+                            }
+
+                            if (mayExclude) {
+                                _logger.Info($"Detected exclude flag in {directoryPath}");
+                            }
+                            
+                            modDirectories.Add(new KeyValuePair<ModDirStatus, string>(mayExclude ? ModDirStatus.Excluded : ModDirStatus.Normal, directoryPath));
+                        } else {
+                            _logger.Info($"Ignored Inactive mod path: {directoryPath}");
+                        }
+                    }
+                } catch (Exception e) {
+                    _logger.Exception(e, "Error");
+                }
+            }
+
+            if (ignoreExcluded) {
+                _logger.Info($"Detected LoadOrder patch. Skipping excluded patches if any...");
+            } else {
+                _logger.Info($"LoadOrder patch not found. Performing normal patch execution...");
+            }
+
             List<KeyValuePair<string, IPatch>> patches = new List<KeyValuePair<string, IPatch>>();
-            List<string> assemblies = new List<string>();
-            try {
-                string[] directories = Directory.GetDirectories(path, "*");
-                for (var i = 0; i < directories.Length; i++) {
-                    if (!Path.GetFileName(directories[i]).StartsWith("_")) {
-                        assemblies.AddRange(GetFiles(directories[i], "*.ipatch", SearchOption.AllDirectories));
-                    } else {
-                        _logger.Info($"Ignored Inactive mod path {directories[i]}");
+            for (var i = 0; i < directoriesPerPath.Count; i++) {
+                List<string> assemblies = new List<string>();
+                string path = directoriesPerPath[i].Key;
+                List<KeyValuePair<ModDirStatus, string>> modDirectories = directoriesPerPath[i].Value;
+                foreach (KeyValuePair<ModDirStatus, string> directoriesWithStatus in modDirectories) {
+                    try {
+                        if (ignoreExcluded && directoriesWithStatus.Key == ModDirStatus.Excluded) {
+                            _logger.Info($"Excluded mod path: {directoriesWithStatus.Value}");
+                            continue;
+                        }
+                        assemblies.AddRange(GetFiles(directoriesWithStatus.Value, "*.ipatch", SearchOption.AllDirectories));
+                    } catch (Exception e) {
+                        _logger.Exception(e, "Error");
                     }
                 }
-            } catch (Exception e) {
-                _logger.Exception(e, "Error");
+                patches.AddRange(ScanInternal(path, assemblies));
             }
+
+            return patches;
+        }
+
+        private List<KeyValuePair<string, IPatch>> ScanInternal(string path, List<string> assemblies) {
+            List<KeyValuePair<string, IPatch>> patches = new List<KeyValuePair<string, IPatch>>();
 
             _logger._Debug("Assemblies:\n\t" + string.Join("\n\t", assemblies.ToArray()));
             for (int i = 0; i < assemblies.Count; i++) {
@@ -110,6 +164,11 @@ namespace PatchLoader {
                 files.AddRange(Directory.GetFiles(path, sp, searchOption));
             files.Sort();
             return files.ToArray();
+        }
+
+        private enum ModDirStatus {
+            Normal,
+            Excluded
         }
     }
 }

@@ -40,7 +40,7 @@
       <HintPath>..\dependencies\ColossalManaged.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="ICities, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="ICities, Version=1.15.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\dependencies\ICities.dll</HintPath>
       <Private>False</Private>
     </Reference>

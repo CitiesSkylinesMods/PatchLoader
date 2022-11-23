@@ -1,0 +1,37 @@
+
+[*]
+
+# Microsoft .NET properties
+csharp_indent_braces = false
+csharp_new_line_before_catch = false
+csharp_new_line_before_else = false
+csharp_new_line_before_members_in_object_initializers = false
+csharp_new_line_before_open_brace = anonymous_types,object_collection_array_initalizers
+csharp_preferred_modifier_order = protected, public, override, private, virtual, internal, abstract, static, sealed, new, readonly, extern, unsafe, volatile, async:suggestion
+csharp_preserve_single_line_blocks = true
+
+# ReSharper properties
+resharper_align_multiline_argument = true
+resharper_arguments_literal = positional
+resharper_blank_lines_after_start_comment = 0
+resharper_blank_lines_around_auto_property = 0
+resharper_blank_lines_around_field = 1
+resharper_braces_for_for = required
+resharper_braces_for_foreach = required_for_multiline
+resharper_csharp_align_multiline_binary_expressions_chain = true
+resharper_csharp_blank_lines_around_invocable = 0
+resharper_csharp_insert_final_newline = false
+resharper_csharp_wrap_after_declaration_lpar = true
+resharper_csharp_wrap_parameters_style = chop_if_long
+resharper_instance_members_qualify_declared_in = 
+resharper_keep_existing_enum_arrangement = false
+resharper_local_function_body = expression_body
+resharper_modifiers_order = protected public override private virtual internal abstract static sealed new readonly extern unsafe volatile async
+resharper_nested_ternary_style = expanded
+resharper_place_expr_method_on_single_line = true
+resharper_place_expr_property_on_single_line = true
+resharper_place_simple_embedded_statement_on_same_line = false
+resharper_remove_blank_lines_near_braces_in_declarations = false
+resharper_space_within_single_line_array_initializer_braces = false
+resharper_wrap_before_declaration_rpar = false
+resharper_wrap_object_and_collection_initializer_style = wrap_if_long
