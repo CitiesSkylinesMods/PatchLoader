@@ -45,9 +45,8 @@ namespace PatchLoader {
         private List<KeyValuePair<string, IPatch>> CollectPatches(Paths paths) {
             var patchScanner = new PatchScanner(_logger);
 
-            return paths
-                .AllModsFolders()
-                .SelectMany(folder => patchScanner.Scan(folder))
+            return patchScanner
+                .Scan(paths.AllModsFolders())
                 .OrderBy(x => x.Value.PatchOrderAsc)
                 .ToList();
         }
