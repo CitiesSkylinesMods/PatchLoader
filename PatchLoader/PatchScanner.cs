@@ -17,6 +17,19 @@ namespace PatchLoader {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
+        /// <summary>
+        /// Scans paths searching for IPatch patches, 
+        /// If LoadOrder Mod patch is detected all directories which contain file of name .excluded will be skipped,
+        /// If LoadOrder Mod patch is not detected all directories will be processed, regardless of .excluded file presence.
+        /// ------------------------------------------------------------------------------------------------------
+        /// Load order status              : included |  excluded   | not installed or directory with '_' prefix |
+        /// ------------------------------------------------------------------------------------------------------
+        /// Load order behaviour           : included | ipatch only | N/A                                        |
+        /// FPSBooster .excluded behaviour : excluded |  excluded   | included                                   |
+        /// ------------------------------------------------------------------------------------------------------
+        /// </summary>
+        /// <param name="paths">Collection of directory paths to scan</param>
+        /// <returns>Collection of types implementing IPatch interface</returns>
         public List<KeyValuePair<string, IPatch>> Scan(IEnumerable<string> paths) {
             bool ignoreExcluded = false;
             List<KeyValuePair<string, List<KeyValuePair<ModDirStatus, string>>>> directoriesPerPath = new List<KeyValuePair<string, List<KeyValuePair<ModDirStatus, string>>>>();  
