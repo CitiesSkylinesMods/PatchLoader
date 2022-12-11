@@ -43,7 +43,7 @@ namespace PatchLoaderMod.Doorstop {
             "export DYLD_INSERT_LIBRARIES",
             "export DOORSTOP_ENABLE",
             "export DOORSTOP_INVOKE_DLL_PATH",
-            "./Cities.app/Contents/MacOS/Cities $@"
+            "exec ./Cities.app/Contents/MacOS/Cities $@"
         );
 
         public MacOSDoorstopManager(string expectedTargetAssemblyPath, Logger logger) : base(expectedTargetAssemblyPath, logger) {
