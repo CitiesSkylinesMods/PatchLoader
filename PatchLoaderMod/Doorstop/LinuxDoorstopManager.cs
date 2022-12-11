@@ -40,7 +40,7 @@ namespace PatchLoaderMod.Doorstop {
             "export LD_PRELOAD",
             "export DOORSTOP_ENABLE",
             "export DOORSTOP_INVOKE_DLL_PATH",
-            "./Cities.x64 $@"
+            "exec ./Cities.x64 $@"
         );
 
         public LinuxDoorstopManager(string expectedTargetAssemblyPath, Logger logger) : base(expectedTargetAssemblyPath, logger) {
